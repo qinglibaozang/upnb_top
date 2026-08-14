@@ -34,6 +34,7 @@ astro dev --background
 @agents/项目约定.md
 @agents/文件索引.md
 @agents/数据结构.md
+@agents/变更日志.md
 
 ## 边界（红线，必须遵守）
 
