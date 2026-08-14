@@ -1,22 +1,94 @@
-## Development
+## 开发
 
-When starting the dev server, use background mode:
+启动开发服务器时，请使用后台模式：
 
 ```
 astro dev --background
 ```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+通过 `astro dev stop`、`astro dev status` 和 `astro dev logs` 管理后台服务器。
 
-## Documentation
+## 文档
 
-Full documentation: https://docs.astro.build
+完整文档：https://docs.astro.build
 
-Consult these guides before working on related tasks:
+处理相关任务前，请查阅以下指南：
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- [添加页面、动态路由或中间件](https://docs.astro.build/en/guides/routing/)
+- [使用 Astro 组件](https://docs.astro.build/en/basics/astro-components/)
+- [使用 React、Vue、Svelte 或其他框架组件](https://docs.astro.build/en/guides/framework-components/)
+- [添加或管理内容](https://docs.astro.build/en/guides/content-collections/)
+- [添加样式或使用 Tailwind](https://docs.astro.build/en/guides/styling/)
+- [支持多语言](https://docs.astro.build/en/guides/internationalization/)
+
+## 项目约定
+
+- 包管理必须用 `pnpm`（项目是 pnpm workspace，根目录有 `pnpm-lock.yaml`）。禁止 `npm install`——会触发 arborist 崩溃 bug（`Link.matches` 空引用）。
+- 内容文件放 `src/content/docs/`，沿用现有分类目录：`00.入站必读`、`01.中小学资源`、`03.AI专区`、`index.mdx`。
+- 站点内容为中文；新增内容默认中文。
+
+## 工作流程：先确认，后动手
+
+**任何编辑或创建文件之前，必须先澄清需求。禁止在需求未确认时猜测着开始写。**
+
+### 第一步：澄清需求（grill）
+
+**每次任务开始，必须先"拷问"需求——逐点澄清，绝不跳过。** 对需求中每个模糊或有多解的点，用以下模板提问（每个问题给 2–4 个候选选项 + 推荐默认），等用户确认后再继续：
+
+提问四讲究：
+
+1. **问决策，不问事实**——文件位置、函数签名、报错含义等可自行查证的信息绝不问用户（去读代码）；只问代码里找不到的：意图、取舍、边界、优先级。
+2. **给选项 + 推荐默认**——不抛开放式问题。格式：`两个方案：A…（优点/代价），B…（优点/代价）。我推荐 A，因为…。选哪个？`
+3. **批量问**——一次列出 3–5 个问题，用户一次回复；不挤牙膏式一问一答。
+4. **每个问题必须影响计划**——问完必须改变产出；问了不改计划的废话问题禁止。
+
+四层问题对应 spec 四段式：
+
+- **目标层**：为什么做？给谁用？成功长什么样？（→ spec 的 目标 Goal）
+- **边界层**：哪些明确不碰？范围到哪？（→ spec 的 不做 Out of scope）
+- **取舍层**：复用还是新建？性能 vs 简单？快 vs 稳？（→ spec 的 技术说明 Technical notes）
+- **验证层**：怎么算完成？用户怎么检查？（→ spec 的 验收标准 Acceptance criteria）
+
+按任务类型追加问题：
+
+| 任务类型 | 必问 |
+|---|---|
+| 新增内容页 | 放在哪个分类目录？标题/侧边栏顺序？内容语言（默认中文）？ |
+| 改样式/布局 | 改全局还是局部？参照哪个现有页面？移动端表现？ |
+| 改组件 | 复用还是新建？影响哪些调用方？props 变化？ |
+| 改脚本/配置 | 触发方式？失败怎么处理？影响构建/开发流程？ |
+| 删改内容 | 保留还是移除？是否需要备份？ |
+
+禁止：跳过澄清直接改文件；把猜测当既定需求；问完不等答复就动手；一次只问一个问题。
+
+### 第二步：按任务大小选择流程
+
+| 任务类型 | 例子 | 要求 |
+|---|---|---|
+| 小 | 改文案、加一篇内容页 | 复述 + 一句话方案，用户点头后动手 |
+| 中 | 加组件、调整布局、改脚本 | 澄清 + 简短 spec（对话内确认） |
+| 大 | 新功能、结构改造 | 完整 spec 文件 + 计划模式，批准后才实现 |
+
+### 第三步：spec 四段式（中/大任务）
+
+写码前先产出 spec，四段缺一不可：
+
+- **目标 Goal**：做什么、为什么
+- **验收标准 Acceptance criteria**：可勾选清单 `- [ ]`，逐条可验证
+- **技术说明 Technical notes**：涉及文件、复用的现有模式、约束
+- **不做 Out of scope**：明确不碰什么
+
+### 第四步：实现
+
+- 严格按已确认的 spec 实现；不得自行扩大范围或添加未要求的功能。
+- 大改动默认进入计划模式，产出计划文件，等批准后才写码。
+
+### 第五步：验收汇报
+
+完成时对照验收标准逐条报告（✓/✗），并说明：改了什么文件、怎么验证、如何查看效果。
+
+## 沟通规范
+
+- 始终用中文交流（代码、命令、报错原文除外）。
+- 新手友好：解释"为什么"而不只给"做什么"；用术语时解释；给出可直接复制运行的命令。
+- 不确定就明说不确定，不糊弄。

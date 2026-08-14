@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@astrojs/starlight':
         specifier: ^0.41.7
-        version: 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3)
+        version: 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2)
       astro:
         specifier: ^7.1.6
         version: 7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3)
@@ -19,10 +19,14 @@ importers:
         version: 0.35.3(@types/node@24.13.3)
       starlight-sidebar-topics:
         specifier: ^0.8.0
-        version: 0.8.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3))
+        version: 0.8.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2))
       starlight-theme-nova:
         specifier: ^0.12.2
-        version: 0.12.2(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3))(satteri@0.9.5)(typescript@6.0.3)
+        version: 0.12.2(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2))(satteri@0.9.5)(typescript@5.0.2)
+    devDependencies:
+      typescript:
+        specifier: ^5.0.2
+        version: 5.0.2
 
 packages:
 
@@ -1866,9 +1870,9 @@ packages:
     peerDependencies:
       typescript: ^5.5.0 || ^6.0.0
 
-  typescript@6.0.3:
-    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
-    engines: {node: '>=14.17'}
+  typescript@5.0.2:
+    resolution: {integrity: sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw==}
+    engines: {node: '>=12.20'}
     hasBin: true
 
   ufo@1.6.4:
@@ -2220,7 +2224,7 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 4.4.3
 
-  '@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3)':
+  '@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2)':
     dependencies:
       '@astrojs/markdown-satteri': 0.3.5
       '@astrojs/mdx': 7.0.5(@astrojs/markdown-satteri@0.3.5)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))
@@ -2236,7 +2240,7 @@ snapshots:
       hast-util-select: 6.0.4
       hast-util-to-string: 3.0.1
       hastscript: 9.0.1
-      i18next: 26.3.6(typescript@6.0.3)
+      i18next: 26.3.6(typescript@5.0.2)
       js-yaml: 4.3.1
       klona: 2.0.6
       magic-string: 0.30.21
@@ -2727,12 +2731,12 @@ snapshots:
       '@shikijs/core': 4.4.3
       '@shikijs/types': 4.4.3
 
-  '@shikijs/twoslash@4.4.3(typescript@6.0.3)':
+  '@shikijs/twoslash@4.4.3(typescript@5.0.2)':
     dependencies:
       '@shikijs/core': 4.4.3
       '@shikijs/types': 4.4.3
-      twoslash: 0.3.9(typescript@6.0.3)
-      typescript: 6.0.3
+      twoslash: 0.3.9(typescript@5.0.2)
+      typescript: 5.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -2788,10 +2792,10 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
-  '@typescript/vfs@1.6.4(typescript@6.0.3)':
+  '@typescript/vfs@1.6.4(typescript@5.0.2)':
     dependencies:
       debug: 4.4.3
-      typescript: 6.0.3
+      typescript: 5.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -3405,9 +3409,9 @@ snapshots:
 
   http-cache-semantics@4.2.0: {}
 
-  i18next@26.3.6(typescript@6.0.3):
+  i18next@26.3.6(typescript@5.0.2):
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 5.0.2
 
   inline-style-parser@0.1.1: {}
 
@@ -4349,14 +4353,14 @@ snapshots:
       '@img/sharp-win32-x64': 0.35.3
       '@types/node': 24.13.3
 
-  shiki-twoslash-renderer@0.3.5(typescript@6.0.3):
+  shiki-twoslash-renderer@0.3.5(typescript@5.0.2):
     dependencies:
       '@aria-ui/core': 0.2.1
       '@aria-ui/elements': 0.1.13
-      '@shikijs/twoslash': 4.4.3(typescript@6.0.3)
+      '@shikijs/twoslash': 4.4.3(typescript@5.0.2)
       '@shikijs/types': 4.4.3
       '@types/hast': 3.0.5
-      twoslash: 0.3.9(typescript@6.0.3)
+      twoslash: 0.3.9(typescript@5.0.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -4389,28 +4393,28 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  starlight-sidebar-topics@0.8.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3)):
+  starlight-sidebar-topics@0.8.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2)):
     dependencies:
-      '@astrojs/starlight': 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3)
+      '@astrojs/starlight': 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2)
       picomatch: 4.0.5
 
-  starlight-theme-nova@0.12.2(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3))(satteri@0.9.5)(typescript@6.0.3):
+  starlight-theme-nova@0.12.2(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2))(satteri@0.9.5)(typescript@5.0.2):
     dependencies:
       '@aria-ui/core': 0.2.1
       '@aria-ui/utils': 0.1.7
       '@astrojs/markdown-satteri': 0.3.5
       '@pagefind/default-ui': 1.5.2
       '@shikijs/transformers': 4.4.3
-      '@shikijs/twoslash': 4.4.3(typescript@6.0.3)
+      '@shikijs/twoslash': 4.4.3(typescript@5.0.2)
       '@shikijs/types': 4.4.3
       '@types/hast': 3.0.5
       astro-theme-toggle: 0.8.1
       hast-util-is-element: 3.0.0
       rehype: 13.0.2
       satteri-custom-header-id: 0.1.0(satteri@0.9.5)
-      shiki-twoslash-renderer: 0.3.5(typescript@6.0.3)
+      shiki-twoslash-renderer: 0.3.5(typescript@5.0.2)
     optionalDependencies:
-      '@astrojs/starlight': 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@6.0.3)
+      '@astrojs/starlight': 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.1(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3))(typescript@5.0.2)
     transitivePeerDependencies:
       - satteri
       - supports-color
@@ -4461,15 +4465,15 @@ snapshots:
 
   twoslash-protocol@0.3.9: {}
 
-  twoslash@0.3.9(typescript@6.0.3):
+  twoslash@0.3.9(typescript@5.0.2):
     dependencies:
-      '@typescript/vfs': 1.6.4(typescript@6.0.3)
+      '@typescript/vfs': 1.6.4(typescript@5.0.2)
       twoslash-protocol: 0.3.9
-      typescript: 6.0.3
+      typescript: 5.0.2
     transitivePeerDependencies:
       - supports-color
 
-  typescript@6.0.3: {}
+  typescript@5.0.2: {}
 
   ufo@1.6.4: {}
 
