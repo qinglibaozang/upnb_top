@@ -1,0 +1,417 @@
+/* ============================================================
+   Starlight 中文站点排版体系（整体配套方案）
+   ------------------------------------------------------------
+   参考：国内主流企业文档站（语雀 / 华为云 / 飞书 / 掘金）
+
+   设计原则：以正文 15px 为基准 100%，形成递减层级
+
+   阅读层级（内容区）：
+     H1 30px · H2 24px · H3 20px · H4 16px
+     正文 15px / 行高 1.7（100%）
+     代码 13px · 表格 13px（87%）
+
+   导航层级（浏览区，配套递减）：
+     顶栏     14px（93%）
+     侧边栏   14px（93%）← 与正文同族，浏览时视觉不跳
+     分组标题 12px（80%）
+     TOC      13px（87%）← 与代码/表格同级，辅助定位
+
+   辅助层级：
+     说明文字 12px（80%）
+   ============================================================ */
+
+/* ── 1. 字体栈 ──────────────────────────────────────────────
+   拉丁字符用系统字体（Nova 主题无 web 字体），中文按平台走最佳黑体
+   （苹方 → 鸿蒙 → 思源 → 雅黑）
+   双重 :root 提升特异性，确保覆盖主题注入的 --sl-font */
+:root:root {
+	--sl-font: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		'PingFang SC', 'HarmonyOS Sans SC', 'Source Han Sans SC', 'Noto Sans CJK SC',
+		'Microsoft YaHei', 'Microsoft YaHei UI', sans-serif;
+	--sl-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+		'Liberation Mono', 'Courier New', monospace;
+
+	/* 行高基调：中文比英文需要更宽松 */
+	--sl-line-height: 1.7;
+	--sl-line-height-headings: 1.3;
+}
+
+/* ── 2. 字形渲染 ──────────────────────────────────────────── */
+:root {
+	font-synthesis: none; /* 禁用中文伪粗体/伪斜体（合成加粗发虚） */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+/* ── 3. 正文区（阅读层级） ────────────────────────────────── */
+.sl-markdown-content {
+	letter-spacing: 0.01em; /* 中英文混排微字距 */
+
+	/* ── 中文排版核心特性（CSS 原生，现代浏览器渐进增强） ── */
+	/* 中英文/数字自动间距（Chrome 122+/Safari 17.5+；旧浏览器由 Pangu.js 客户端脚本兑底） */
+	text-autospace: ideograph-alpha ideograph-numeric;
+	/* 全角标点相邻空格压缩（中文标点排版） */
+	text-spacing-trim: space-first;
+	/* 中文标点禁则：标点不悬挂在行首 */
+	line-break: strict;
+	/* 行尾标点悬挂（中文竖排规范的行尾标点效果） */
+	hanging-punctuation: allow-end;
+	/* 长词/URL 换行不溢出 */
+	overflow-wrap: break-word;
+}
+
+/* 标题阶梯：30 / 24 / 20 / 16，等比递减（替代 black 的 30/20/18 不均比例） */
+.sl-markdown-content :is(h1, h2, h3) {
+	letter-spacing: 0.005em;
+	font-weight: 600;
+}
+
+.sl-markdown-content h2 {
+	font-size: 1.5rem; /* 24px */
+	line-height: 2rem;
+}
+
+.sl-markdown-content h3 {
+	font-size: 1.25rem; /* 20px */
+	line-height: 1.75rem;
+}
+
+/* 表格：13px 与代码同级 */
+.sl-markdown-content table {
+	display: table;
+	width: 100%;
+	font-size: 0.8125rem; /* 13px */
+	line-height: 1.6;
+	border-collapse: separate;
+	border-spacing: 0;
+	border-radius: 0.5rem;
+	overflow: hidden;
+}
+
+.sl-markdown-content thead {
+	background: var(--zh-accent-soft);
+}
+
+.sl-markdown-content thead th {
+	font-weight: 600;
+	border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+.sl-markdown-content tbody tr {
+	transition: background-color 0.15s ease;
+}
+
+.sl-markdown-content tbody tr:hover {
+	background: var(--zh-accent-soft);
+}
+
+.sl-markdown-content img {
+	border-radius: 0.75rem;
+}
+
+/* 行内代码与代码块：13px */
+.sl-markdown-content :not(pre) > code {
+	font-size: 0.8125em;
+}
+
+.expressive-code {
+	font-size: 0.8125rem;
+}
+
+/* 引用块圆角 */
+.sl-markdown-content blockquote {
+	border-radius: 0 0.5rem 0.5rem 0;
+}
+
+/* ── 4. 左栏侧边栏（导航层级） ──────────────────────────────
+   链接 14px：与正文 15px 配套（93%），大厂主流档位
+   分组标题保持 12px，拉开层级差 */
+.sidebar-content .entry-link {
+	font-size: 0.875rem; /* 14px */
+	line-height: 1.5;
+	height: auto;
+	min-height: 2rem;
+	border-radius: 0.5rem; /* 胶囊圆角 */
+}
+
+/* 文章标题选中：正蓝实底 + 白字（与 topic 图标选中同色系） */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+	font-weight: 600;
+	color: #fff;
+	background-color: var(--zh-article-active-text);
+}
+
+/* ── 5. 右栏目录 TOC（定位层级） ────────────────────────────
+   12.8px → 13px：与代码/表格同层级，定位信息不抢正文 */
+starlight-toc a {
+	font-size: 0.8125rem; /* 13px */
+	line-height: 1.5;
+}
+
+/* ── 6. 辅助细节 ──────────────────────────────────────────── */
+/* sidebar 分类选中态：整行高亮胶囊
+   悬停 → 仅淡红背景，文字不变色；选中 → 正红实底 + 白字 */
+.starlight-sidebar-topics a {
+	border-radius: 0.5rem;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.starlight-sidebar-topics a:hover,
+.starlight-sidebar-topics a:focus-visible {
+	background: var(--zh-article-active-bg);
+}
+
+.starlight-sidebar-topics a.starlight-sidebar-topics-current {
+	background: transparent;
+	color: var(--zh-article-active-text);
+}
+
+/* 选中：图标方块反色（正蓝底 + 白图标），与文章标题选中同色系 */
+.starlight-sidebar-topics a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
+	background: var(--zh-article-active-text);
+	border-color: var(--zh-article-active-text);
+	color: #fff;
+}
+
+/* hover 图标保持原色 */
+.starlight-sidebar-topics a:hover .starlight-sidebar-topics-icon,
+.starlight-sidebar-topics a:focus-visible .starlight-sidebar-topics-icon {
+	background: transparent;
+	border-color: var(--sl-color-gray-4);
+	color: inherit;
+}
+.zh-nav-title {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1;
+}
+
+/* 顶部导航右侧工具区：推至最右（替代缺失的 Tailwind ml-auto） */
+.zh-nav-right {
+	margin-left: auto;
+}
+
+@media (min-width: 48rem) {
+	.zh-nav-title {
+		position: static;
+		left: auto;
+		transform: none;
+		z-index: auto;
+	}
+}
+
+/* 顶部导航站点 logo：圆形蒙版 */
+.site-title img {
+	border-radius: 50%;
+	object-fit: cover;
+	height: 2rem;
+	width: 2rem;
+}
+
+/* 侧边栏分类分隔线：全站统一线色（黑底侧边栏上也清晰可见） */
+.starlight-sidebar-topics::after {
+	height: 1px;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	border-top: none;
+	background: var(--zh-line);
+	box-shadow: 0 2px 8px var(--zh-shadow-md);
+}
+
+/* 全角标点与汉字之间的视觉间距（由脚本包裹 span，不改文本内容）
+   仅贴汉字侧加 margin；贴英文/空格侧不加（那里已有盘古空格） */
+.zh-punct {
+	display: inline;
+}
+
+.zh-punct--l {
+	margin-left: 0.09em;
+}
+
+.zh-punct--r {
+	margin-right: 0.09em;
+}
+
+/* ── 7. 全局立体线条（顶部导航 / 左右边栏 / 正文组件统一风格） ──
+   所有线统一用 gray-4：明主题白底上是深灰（黑线），暗主题黑底上是浅灰（白线），
+   且在 nova 的黑色侧边栏背景上始终可见——全站线条完全一致 */
+:root {
+	--zh-line: var(--sl-color-gray-4); /* 全站统一线色 */
+	/* 正文内容宽度：随视口自适应（大屏更宽，中小屏保持舒适） */
+	--sl-content-width: clamp(50rem, 58vw, 72rem);
+	--zh-topic-active-bg: #ef4444; /* 分类选中：鲜红（柔和不刺眼） */
+	--zh-topic-active-text: #fff;
+	--zh-article-active-text: #3b82f6; /* 文章选中：正蓝（暗色模式） */
+	--zh-article-active-bg: rgba(59, 130, 246, 0.16);
+	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
+	--zh-shadow-md: rgba(255, 255, 255, 0.12);
+	--zh-shadow-lg: rgba(255, 255, 255, 0.16);
+	--zh-accent-soft: rgba(120, 150, 255, 0.13);
+}
+
+:root[data-theme='light'] {
+	--zh-line: var(--sl-color-gray-4);
+	--zh-topic-active-bg: #ef4444;
+	--zh-topic-active-text: #fff;
+	--zh-article-active-text: #1d4ed8; /* 文章选中：正深蓝（明色模式） */
+	--zh-article-active-bg: rgba(29, 78, 216, 0.1);
+	--zh-shadow-sm: rgba(15, 20, 34, 0.15);
+	--zh-shadow-md: rgba(15, 20, 34, 0.25);
+	--zh-shadow-lg: rgba(15, 20, 34, 0.3);
+	--zh-accent-soft: rgba(56, 92, 246, 0.1);
+}
+
+:root[data-theme='dark'] {
+	--zh-line: var(--sl-color-gray-4);
+	--zh-topic-active-bg: #ef4444;
+	--zh-topic-active-text: #fff;
+	--zh-article-active-text: #3b82f6;
+	--zh-article-active-bg: rgba(59, 130, 246, 0.16);
+	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
+	--zh-shadow-md: rgba(255, 255, 255, 0.12);
+	--zh-shadow-lg: rgba(255, 255, 255, 0.16);
+	--zh-accent-soft: rgba(120, 150, 255, 0.13);
+}
+
+/* 顶部导航栏底边：统一线色 + 柔和投影 */
+header {
+	width: 100vw; /* 固定为视口宽：防止页面滚动条出现时 header 变窄导致右侧工具区位移 */
+	border-color: var(--zh-line);
+	box-shadow: 0 2px 8px var(--zh-shadow-md);
+}
+
+/* 左侧边栏右边框：统一线色 + 向右投影 */
+#starlight__sidebar {
+	border-color: var(--zh-line);
+	box-shadow: 2px 0 8px var(--zh-shadow-md);
+}
+
+/* 右侧目录左边框：与左侧完全对称（线在 .right-sidebar 内层，覆盖 nova 的 hairline） */
+.right-sidebar {
+	border-inline-start-color: var(--zh-line);
+	box-shadow: -2px 0 8px var(--zh-shadow-md);
+}
+
+/* 搜索框：内阴影凹陷（线框感） */
+site-search button[data-open-modal] {
+	box-shadow: inset 0 1px 3px var(--zh-shadow-sm);
+}
+
+/* 卡片：柔和浮起 */
+.sl-markdown-content .card {
+	box-shadow:
+		0 1px 2px var(--zh-shadow-sm),
+		0 4px 12px var(--zh-shadow-sm);
+}
+
+/* 代码块：微投影 */
+.expressive-code {
+	box-shadow: 0 2px 6px var(--zh-shadow-md);
+}
+
+/* 正文分隔线 hr：全站统一线色 + 同款投影 */
+.sl-markdown-content hr {
+	border: 0;
+	height: 1px;
+	background: var(--zh-line);
+	box-shadow: 0 2px 8px var(--zh-shadow-md);
+}
+
+/* 表格：加投影增强层次 */
+.sl-markdown-content table {
+	box-shadow: 0 1px 4px var(--zh-shadow-sm);
+}
+
+/* 右栏目录 TOC：隐藏「概述」项
+   第一层：直接隐藏链接（兼容不支持 :has 的旧浏览器/内置 WebView）
+   第二层：现代浏览器隐藏整个 li，避免留空行 */
+starlight-toc a[href='#_top'],
+mobile-starlight-toc a[href='#_top'] {
+	display: none;
+}
+
+starlight-toc li:has(a[href='#_top']),
+mobile-starlight-toc li:has(a[href='#_top']) {
+	display: none;
+}
+
+/* ── 回到顶部按钮（带阅读进度百分比） ── */
+.zh-back-top {
+	position: fixed;
+	right: 1.5rem;
+	bottom: 1.5rem;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 50%;
+	border: 1px solid var(--zh-line);
+	background: var(--sl-color-bg);
+	box-shadow: 0 2px 8px var(--zh-shadow-md);
+	cursor: pointer;
+	z-index: 999;
+	opacity: 0;
+	transform: translateY(10px);
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease;
+	pointer-events: none;
+}
+
+.zh-back-top.show {
+	opacity: 1;
+	transform: none;
+	pointer-events: auto;
+}
+
+.zh-back-top svg {
+	width: 100%;
+	height: 100%;
+	transform: rotate(-90deg);
+}
+
+.zh-bt-bg {
+	fill: none;
+	stroke: var(--sl-color-gray-4);
+	stroke-width: 2.5;
+	opacity: 0.35;
+}
+
+.zh-bt-fg {
+	fill: none;
+	stroke: var(--sl-color-accent);
+	stroke-width: 2.5;
+	stroke-linecap: round;
+}
+
+.zh-bt-pct {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.7rem;
+	font-weight: 600;
+	color: var(--sl-color-text);
+}
+
+/* 桌面端 hover 微放大 */
+@media (min-width: 48rem) {
+	.zh-back-top:hover {
+		transform: scale(1.08);
+	}
+}
+
+/* ── 9. 选中文字 ──────────────────────────────────────────── */
+::selection {
+	background: var(--zh-accent-soft);
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(127, 127, 127, 0.5) transparent;
+}

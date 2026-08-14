@@ -1,0 +1,40 @@
+---
+title: 首页
+description: 优质学习资源汇总导航
+template: splash # 首页落地页布局（无侧边栏），文章入口请看下方按钮或各文档页左侧边栏
+hero:
+  tagline: 优质学习资源汇总导航
+  image:
+    file: ../../assets/houston.webp
+  actions:
+    - text: 入站必读
+      link: /00入站必读/01使用指南/
+      icon: right-arrow
+    - text: 学习资源
+      link: /01学习资源/01学习网站/
+      icon: star
+# 正文宽度：wide(1200px) / full(占满) / 或 CSS 长度如 900px；删掉该行则用全局默认
+contentWidth: wide
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## 站点导航
+
+<CardGrid stagger>
+	<Card title="入站必读" icon="rocket">
+		新手使用指南与上网技巧，建议先看这里。
+
+		[开始阅读 →](/00入站必读/01使用指南/)
+	</Card>
+	<Card title="学习资源" icon="open-book">
+		学习网站、学习 APP、K12 资源与优质网课汇总。
+
+		[查看资源 →](/01学习资源/01学习网站/)
+	</Card>
+	<Card title="UP主推荐" icon="star">
+		各学科宝藏 UP 主推荐清单。
+
+		[查看推荐 →](/02up主推荐/01学科up主/)
+	</Card>
+</CardGrid>

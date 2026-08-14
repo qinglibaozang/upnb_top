@@ -1,0 +1,23 @@
+---
+// 覆盖 nova 的 TwoColumnContent：
+// 读取页面 frontmatter 的 contentWidth，注入 --sl-content-width 变量控制正文宽度
+import NovaTwoColumnContent from 'starlight-theme-nova/components/TwoColumnContent.astro'
+
+const entry = Astro.locals.starlightRoute.entry
+const raw = entry.data.contentWidth as string | undefined
+
+// 预设关键字
+const PRESETS: Record<string, string> = {
+	wide: '75rem', // 1200px，比默认更宽（适合长文档）
+	full: '100%', // 占满可用区域
+}
+
+const contentWidth = raw ? (PRESETS[raw] ?? raw) : undefined
+---
+
+<div style={contentWidth ? { '--sl-content-width': contentWidth } : undefined}>
+	<NovaTwoColumnContent>
+		<slot name="right-sidebar" slot="right-sidebar" />
+		<slot />
+	</NovaTwoColumnContent>
+</div>
