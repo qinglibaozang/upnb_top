@@ -15,6 +15,7 @@
 ### 新增
 - 启用 Astro View Transitions（`src/components/Head.astro` 注入 ClientRouter）：页面切换平滑过渡 + 全站链接预取（`prefetchAll`），显著提升切页流畅度
 - 预取策略改为 `viewport`：链接进入视口即预加载（手机无需悬停，修复移动端切页无预取导致卡顿的问题）
+- 页脚新增版权信息（© 2026 情礼宝藏）与 ICP 备案号（吉ICP备2022006636号-1，链接工信部官网 beian.miit.gov.cn）：自定义 `src/components/Footer.astro` 在 Starlight 默认页脚（编辑链接/更新时间/分页）基础上追加
 
 ### 变更
 - AGENTS.md 规则体系适配 DSH：方法型规则（命令/风格/Git/安全/流程/约定）精炼内联，事实型规则（项目结构/文件索引/数据结构等）改为按需读取 `agents/` 原文（`@import` 在 DSH 下不自动内联）

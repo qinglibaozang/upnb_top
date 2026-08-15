@@ -125,6 +125,8 @@ export default defineConfig({
 				Head: './src/components/Head.astro',
 				// 覆盖 Search：初始化改为 connectedCallback，兼容 View Transitions 切页
 				Search: './src/components/Search.astro',
+				// 覆盖 Footer：追加版权信息 + ICP 备案号
+				Footer: './src/components/Footer.astro',
 			},
 			// 站点 logo（顶部导航站点名前）
 			logo: {
