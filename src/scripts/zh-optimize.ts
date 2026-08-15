@@ -362,6 +362,11 @@ function walk(root: HTMLElement) {
 }
 
 function init() {
+	// 清理上次导航残留的 window/document 监听器（VT 切页时 window/document 不换，
+	// 只有 body 内容被替换，避免监听器累积导致重复执行/内存泄漏）
+	backTopCleanup?.();
+	backTopCleanup = null;
+
 	const targets = document.querySelectorAll('.sl-markdown-content');
 	for (const el of targets) walk(el as HTMLElement);
 	initBackTop();
@@ -369,22 +374,28 @@ function init() {
 	initMobileMenuKeep();
 }
 
+let backTopCleanup: (() => void) | null = null;
+
 /** 移动端：点击分类不关菜单（跳转后自动重新展开，便于继续选文章） */
 function initMobileMenuKeep() {
 	const isMobile = () => window.matchMedia('(max-width: 47.999rem)').matches;
 
-	// 点击分类链接（sidebar-topics）→ 记录标记
-	document.addEventListener(
-		'click',
-		(e) => {
-			const target = e.target as HTMLElement;
-			const link = target.closest?.('.starlight-sidebar-topics a') as HTMLAnchorElement | null;
-			if (link && isMobile()) {
-				sessionStorage.setItem('zh-expand-menu', '1');
-			}
-		},
-		false,
-	);
+	// 点击分类链接（sidebar-topics）→ 记录标记。
+	// 监听器只注册一次（模块级标志），避免 VT 多次导航后重复注册累积。
+	if (!menuListenerRegistered) {
+		menuListenerRegistered = true;
+		document.addEventListener(
+			'click',
+			(e) => {
+				const target = e.target as HTMLElement;
+				const link = target.closest?.('.starlight-sidebar-topics a') as HTMLAnchorElement | null;
+				if (link && isMobile()) {
+					sessionStorage.setItem('zh-expand-menu', '1');
+				}
+			},
+			false,
+		);
+	}
 
 	// 新页面加载：如有标记则自动展开移动菜单（文章链接不会设置标记，正常关闭）
 	// 用 window load 确保 nova 菜单组件初始化完成，避免其初始化时重置 body 属性
@@ -400,6 +411,8 @@ function initMobileMenuKeep() {
 		}
 	}
 }
+
+let menuListenerRegistered = false;
 
 /** 移除 TOC 中的「概述」项（直接删 DOM，不依赖 CSS 选择器兼容性） */
 function removeTocOverview() {
@@ -445,12 +458,17 @@ function initBackTop() {
 	onScroll();
 
 	btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+	// 记录清理函数：VT 导航后按钮随 body 替换消失，但 window 监听器残留，
+	// 下次 init 时先移除旧监听器，避免累积。
+	backTopCleanup = () => {
+		window.removeEventListener('scroll', onScroll);
+	};
 }
 
 if (typeof document !== 'undefined') {
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', init);
-	} else {
-		init();
-	}
+	// 用 astro:page-load 而非 DOMContentLoaded：
+	// 启用 View Transitions 后，切页不会重新执行本脚本，但 astro:page-load 在
+	// 首次加载和每次导航后都会触发，确保菜单/回到顶部/排版在切页后依然生效。
+	document.addEventListener('astro:page-load', init);
 }

@@ -123,6 +123,8 @@ export default defineConfig({
 				TwoColumnContent: './src/components/TwoColumnContent.astro',
 				// 启用 View Transitions（页面平滑过渡 + 链接预取，提升切页流畅度）
 				Head: './src/components/Head.astro',
+				// 覆盖 Search：初始化改为 connectedCallback，兼容 View Transitions 切页
+				Search: './src/components/Search.astro',
 			},
 			// 站点 logo（顶部导航站点名前）
 			logo: {
