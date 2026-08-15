@@ -172,32 +172,40 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 			this._pagefindInit = true;
 			const bundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
 			// 立即预取 pagefind.js（搜索引擎本体）：PagefindUI 内部懒加载，不预取的话
-			// 首次输入才下载 pagefind.js + wasm，造成明显等待；同时不受 idle 调度影响
+			// 首次输入才下载 pagefind.js + wasm，造成明显等待
 			try {
 				fetch(bundleUrl + 'pagefind.js');
 			} catch {}
-			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-			onIdle(async () => {
-				// @ts-expect-error — Missing types for vendored pagefind-ui-core.mjs.
-				// @pagefind/default-ui 是 Starlight 私有依赖（仅存于 pnpm 虚拟存储），复制组件后按包名解析失败，
-				// 故改为导入项目内自包含的副本（src/vendor/pagefind-ui-core.mjs，210KB 单文件 bundle）
-				const { PagefindUI } = await import('../vendor/pagefind-ui-core.mjs');
-				new PagefindUI({
-					...pagefindUserConfig,
-					element: '#starlight__search',
-					baseUrl: import.meta.env.BASE_URL,
-					bundlePath: bundleUrl,
-					showImages: false,
-					translations: this._translations,
-					showSubResults: true,
-					processResult: (result: { url: string; sub_results: Array<{ url: string }> }) => {
-						result.url = this._formatURL(result.url);
-						result.sub_results = result.sub_results.map((sub_result) => {
-							sub_result.url = this._formatURL(sub_result.url);
-							return sub_result;
-						});
-					},
-				});
+			// **立即初始化，不等 requestIdleCallback**：
+			// 之前用 onIdle 等浏览器空闲，PC 上浏览器可能一直忙（图片/脚本/VT 动画），
+			// 导致按 Ctrl+K 时对话框弹出但 #starlight__search 还是空的（搜索框没出现），
+			// 刷新后缓存热了才初始化完成——表现为「要刷新才出来」。
+			// dialog 默认关闭，PagefindUI 渲染在隐藏对话框里，不影响首屏。
+			this._initUI();
+		}
+
+		async _initUI() {
+			// @ts-expect-error — Missing types for vendored pagefind-ui-core.mjs.
+			// @pagefind/default-ui 是 Starlight 私有依赖（仅存于 pnpm 虚拟存储），复制组件后按包名解析失败，
+			// 故改为导入项目内自包含的副本（src/vendor/pagefind-ui-core.mjs，210KB 单文件 bundle）
+			const { PagefindUI } = await import('../vendor/pagefind-ui-core.mjs');
+			if (!this.isConnected) return;
+			const bundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
+			new PagefindUI({
+				...pagefindUserConfig,
+				element: '#starlight__search',
+				baseUrl: import.meta.env.BASE_URL,
+				bundlePath: bundleUrl,
+				showImages: false,
+				translations: this._translations,
+				showSubResults: true,
+				processResult: (result: { url: string; sub_results: Array<{ url: string }> }) => {
+					result.url = this._formatURL(result.url);
+					result.sub_results = result.sub_results.map((sub_result) => {
+						sub_result.url = this._formatURL(sub_result.url);
+						return sub_result;
+					});
+				},
 			});
 		}
 	}

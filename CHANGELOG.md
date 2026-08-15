@@ -9,6 +9,7 @@
 - 搜索打开提速：页面加载即预取 Pagefind 搜索引擎本体（`pagefind.js`），避免按 Ctrl+K 后首次输入才现场下载索引导致长时间等待
 - 移动端搜索图标缩小为 16px（与主题切换图标一致）：Starlight 原版按钮 font-size 为 `--sl-text-xl`(20px)，在自定义移动端顶栏中偏大
 - 修复 PC 端 Ctrl+K 搜索"要刷新才出现"：Ctrl+K 监听器原在 constructor 里注册，View Transitions 切页时新 `<site-search>` 元素重复 upgrade 导致监听器累积（切页后多个监听器交替开/关，表现无反应）；改为模块级标志全局只注册一次，回调动态查找当前元素
+- 修复 PC 端搜索框"刷新后才出现"的深层原因：Pagefind 初始化原用 `requestIdleCallback` 等浏览器空闲才执行，PC 上浏览器持续繁忙时初始化迟迟不完成，按 Ctrl+K 时对话框内搜索框为空；改为 `connectedCallback` 触发后**立即初始化**（PagefindUI 渲染在默认关闭的对话框内，不影响首屏）
 
 ### 新增
 - 启用 Astro View Transitions（`src/components/Head.astro` 注入 ClientRouter）：页面切换平滑过渡 + 全站链接预取（`prefetchAll`），显著提升切页流畅度
