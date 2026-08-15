@@ -77,9 +77,10 @@ function autoTopics() {
 
 // https://astro.build/config
 export default defineConfig({
-	// 预取全部站内链接（配合 ClientRouter 使用，悬停即预加载，提升切页速度）
+	// 预取全部站内链接（配合 ClientRouter 使用：链接进入视口即预加载，手机无需悬停，提升切页速度）
 	prefetch: {
 		prefetchAll: true,
+		defaultStrategy: 'viewport',
 	},
 	integrations: [
 		{
