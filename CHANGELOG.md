@@ -10,6 +10,7 @@
 - 移动端搜索图标缩小为 16px（与主题切换图标一致）：Starlight 原版按钮 font-size 为 `--sl-text-xl`(20px)，在自定义移动端顶栏中偏大
 - 修复 PC 端 Ctrl+K 搜索"要刷新才出现"：Ctrl+K 监听器原在 constructor 里注册，View Transitions 切页时新 `<site-search>` 元素重复 upgrade 导致监听器累积（切页后多个监听器交替开/关，表现无反应）；改为模块级标志全局只注册一次，回调动态查找当前元素
 - 修复 PC 端搜索框"刷新后才出现"的深层原因：Pagefind 初始化原用 `requestIdleCallback` 等浏览器空闲才执行，PC 上浏览器持续繁忙时初始化迟迟不完成，按 Ctrl+K 时对话框内搜索框为空；改为 `connectedCallback` 触发后**立即初始化**（PagefindUI 渲染在默认关闭的对话框内，不影响首屏）
+- 修复 PC 端搜索按钮不显示 "Ctrl K" 组合键提示：快捷键 `<kbd>` 初始 `display:none`，原版用 `<script is:inline>` 在页面加载时显示一次；View Transitions 切页后新元素 kbd 回到隐藏态但脚本不重跑，提示消失，刷新才恢复；改为在 `connectedCallback` 中显示（首次加载 + 每次切页均生效），并保留原版 Apple 设备显示 ⌘ 的逻辑
 
 ### 新增
 - 启用 Astro View Transitions（`src/components/Head.astro` 注入 ClientRouter）：页面切换平滑过渡 + 全站链接预取（`prefetchAll`），显著提升切页流畅度

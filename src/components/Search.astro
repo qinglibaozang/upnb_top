@@ -54,24 +54,12 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 
 {
 	/**
-	 * This is intentionally inlined to avoid briefly showing an invalid shortcut.
-	 * Purposely using the deprecated `navigator.platform` property to detect Apple devices, as the
-	 * user agent is spoofed by some browsers when opening the devtools.
+	 * 快捷键提示（Ctrl K / ⌘K）的显示逻辑已合并进下方主脚本的 connectedCallback：
+	 * 原版放在 <script is:inline> 里，只在页面加载时执行一次；View Transitions 切页后
+	 * 新元素重新插入（kbd 回到 display:none）但脚本不重跑，导致提示不显示。
+	 * 移到 connectedCallback 后，首次加载和每次切页都会重新显示。
 	 */
 }
-<script is:inline>
-	(() => {
-		const openBtn = document.querySelector('button[data-open-modal]');
-		const shortcut = openBtn?.querySelector('kbd');
-		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
-		const platformKey = shortcut.querySelector('kbd');
-		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
-			platformKey.textContent = '⌘';
-			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
-		}
-		shortcut.style.display = '';
-	})();
-</script>
 
 <script>
 	import { pagefindUserConfig } from 'virtual:starlight/pagefind-config';
@@ -164,7 +152,26 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 		 * 替代原版依赖 DOMContentLoaded 的单次初始化（切页后不会重新执行）。
 		 */
 		connectedCallback() {
+			this.showShortcut();
 			this.initPagefind();
+		}
+
+		/**
+		 * 显示快捷键提示（Ctrl K / ⌘K）：kbd 初始 display:none，
+		 * 原版用 is:inline 脚本在页面加载时执行一次，VT 切页后 kbd 回到隐藏态但脚本不重跑，
+		 * 移到 connectedCallback 后首次加载和每次切页都会重新显示。
+		 * 用 navigator.platform 检测 Apple 设备（原版设计，避免 devtools 下 UA 被伪造）。
+		 */
+		showShortcut() {
+			const openBtn = this.querySelector<HTMLButtonElement>('button[data-open-modal]');
+			const shortcut = openBtn?.querySelector('kbd');
+			if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+			const platformKey = shortcut.querySelector('kbd');
+			if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+				platformKey.textContent = '⌘';
+				openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+			}
+			shortcut.style.display = '';
 		}
 
 		initPagefind() {
