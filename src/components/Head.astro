@@ -1,0 +1,9 @@
+---
+// 覆盖 Starlight 默认 Head 组件：启用 Astro View Transitions（页面平滑过渡 + 链接预取）
+// 参考：https://docs.astro.build/en/guides/view-transitions/
+import { ClientRouter } from 'astro:transitions';
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<ClientRouter />
+<Default {...Astro.props} />

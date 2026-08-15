@@ -77,6 +77,10 @@ function autoTopics() {
 
 // https://astro.build/config
 export default defineConfig({
+	// 预取全部站内链接（配合 ClientRouter 使用，悬停即预加载，提升切页速度）
+	prefetch: {
+		prefetchAll: true,
+	},
 	integrations: [
 		{
 			// 中文排版优化：盘古之白（中英文自动空格）+ 标点间距 客户端脚本
@@ -116,6 +120,8 @@ export default defineConfig({
 				Header: './src/components/Header.astro',
 				// 读取 frontmatter 的 contentWidth 控制正文宽度
 				TwoColumnContent: './src/components/TwoColumnContent.astro',
+				// 启用 View Transitions（页面平滑过渡 + 链接预取，提升切页流畅度）
+				Head: './src/components/Head.astro',
 			},
 			// 站点 logo（顶部导航站点名前）
 			logo: {
