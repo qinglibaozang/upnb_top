@@ -6,6 +6,7 @@
 - 根因：启用 View Transitions 后 Astro 不会在切页时重新执行页面脚本，原依赖 `DOMContentLoaded` 的初始化只在首次加载触发一次
 - 修复方式：`zh-optimize.ts` 改用官方 `astro:page-load` 事件（首次加载 + 每次导航均触发），并为菜单监听器/回到顶部滚动监听器增加防重与清理；搜索组件复制到项目内覆盖，Pagefind 初始化从 `DOMContentLoaded` 改为 custom element 的 `connectedCallback`
 - 移动端搜索按钮不再显示凹陷框（`zh.css` 搜索框内阴影改为仅桌面端 `min-width: 50rem` 生效），避免移动端出现突兀的线框感
+- 搜索打开提速：页面加载即预取 Pagefind 搜索引擎本体（`pagefind.js`），避免按 Ctrl+K 后首次输入才现场下载索引导致长时间等待
 
 ### 新增
 - 启用 Astro View Transitions（`src/components/Head.astro` 注入 ClientRouter）：页面切换平滑过渡 + 全站链接预取（`prefetchAll`），显著提升切页流畅度

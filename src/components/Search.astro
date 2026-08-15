@@ -148,9 +148,15 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 		initPagefind() {
 			if (import.meta.env.DEV || this._pagefindInit) return;
 			this._pagefindInit = true;
+			const bundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
+			// 立即预取 pagefind.js（搜索引擎本体）：PagefindUI 内部懒加载，不预取的话
+			// 首次输入才下载 pagefind.js + wasm，造成明显等待；同时不受 idle 调度影响
+			try {
+				fetch(bundleUrl + 'pagefind.js');
+			} catch {}
 			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
 			onIdle(async () => {
-				// @ts-expect-error — Missing types for @pagefind/default-ui package.
+				// @ts-expect-error — Missing types for vendored pagefind-ui-core.mjs.
 				// @pagefind/default-ui 是 Starlight 私有依赖（仅存于 pnpm 虚拟存储），复制组件后按包名解析失败，
 				// 故改为导入项目内自包含的副本（src/vendor/pagefind-ui-core.mjs，210KB 单文件 bundle）
 				const { PagefindUI } = await import('../vendor/pagefind-ui-core.mjs');
@@ -158,7 +164,7 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 					...pagefindUserConfig,
 					element: '#starlight__search',
 					baseUrl: import.meta.env.BASE_URL,
-					bundlePath: import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/',
+					bundlePath: bundleUrl,
 					showImages: false,
 					translations: this._translations,
 					showSubResults: true,
