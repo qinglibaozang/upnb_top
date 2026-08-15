@@ -76,7 +76,14 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 <script>
 	import { pagefindUserConfig } from 'virtual:starlight/pagefind-config';
 
+	// 模块级标志：Ctrl+K 监听器全局只注册一次（VT 切页会重复执行 constructor，
+	// 若在 constructor 里注册会导致监听器累积，Ctrl+K 行为异常，见 constructor 内注释）
+	let keydownRegistered = false;
+
 	class SiteSearch extends HTMLElement {
+		openModal!: (event?: MouseEvent) => void;
+		closeModal!: () => void;
+
 		constructor() {
 			super();
 			const openBtn = this.querySelector<HTMLButtonElement>('button[data-open-modal]')!;
@@ -106,6 +113,10 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 
 			const closeModal = () => dialog.close();
 
+			// 挂到实例上，供模块级 Ctrl+K 回调使用（见 keydown 单次注册）
+			this.openModal = openModal;
+			this.closeModal = closeModal;
+
 			openBtn.addEventListener('click', openModal);
 			openBtn.disabled = false;
 			closeBtn.addEventListener('click', closeModal);
@@ -115,13 +126,24 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 				window.removeEventListener('click', onClick);
 			});
 
-			// Listen for `ctrl + k` and `cmd + k` keyboard shortcuts.
-			window.addEventListener('keydown', (e) => {
-				if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'k') {
-					dialog.open ? closeModal() : openModal();
-					e.preventDefault();
-				}
-			});
+			// Ctrl+K / Cmd+K 快捷键：**全局只注册一次**。
+			// 为什么：View Transitions 切页时新 <site-search> 元素会重新 upgrade（重新执行
+			// constructor），若在 constructor 里注册 keydown，切页一次就多一个监听器——
+			// 按 Ctrl+K 时多个监听器交替 open/close，表现为「没反应，刷新才正常」。
+			// 这里用模块级标志保证只注册一次，回调通过 document 找到当前元素操作。
+			if (!keydownRegistered) {
+				keydownRegistered = true;
+				window.addEventListener('keydown', (e) => {
+					if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'k') {
+						e.preventDefault();
+						const search = document.querySelector<SiteSearch>('site-search');
+						if (!search) return;
+						const dlg = search.querySelector('dialog');
+						if (!dlg) return;
+						dlg.open ? search.closeModal() : search.openModal();
+					}
+				});
+			}
 
 			// 挂到实例上，供 initPagefind 在 VT 切页后重复初始化时使用
 			let translations = {};
