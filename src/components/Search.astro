@@ -68,6 +68,10 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 	// 若在 constructor 里注册会导致监听器累积，Ctrl+K 行为异常，见 constructor 内注释）
 	let keydownRegistered = false;
 
+	// 模块级常量：pagefind 资源目录 URL（站点根路径去尾斜杠 + /pagefind/）。
+	// 预取（initPagefind）与 UI 初始化（_initUI）两处共用，避免重复计算
+	const pagefindBundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
+
 	class SiteSearch extends HTMLElement {
 		openModal!: (event?: MouseEvent) => void;
 		closeModal!: () => void;
@@ -177,11 +181,10 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 		initPagefind() {
 			if (import.meta.env.DEV || this._pagefindInit) return;
 			this._pagefindInit = true;
-			const bundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
 			// 立即预取 pagefind.js（搜索引擎本体）：PagefindUI 内部懒加载，不预取的话
 			// 首次输入才下载 pagefind.js + wasm，造成明显等待
 			try {
-				fetch(bundleUrl + 'pagefind.js');
+				fetch(pagefindBundleUrl + 'pagefind.js');
 			} catch {}
 			// **立即初始化，不等 requestIdleCallback**：
 			// 之前用 onIdle 等浏览器空闲，PC 上浏览器可能一直忙（图片/脚本/VT 动画），
@@ -197,12 +200,11 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 			// 故改为导入项目内自包含的副本（src/vendor/pagefind-ui-core.mjs，210KB 单文件 bundle）
 			const { PagefindUI } = await import('../vendor/pagefind-ui-core.mjs');
 			if (!this.isConnected) return;
-			const bundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
 			new PagefindUI({
 				...pagefindUserConfig,
 				element: '#starlight__search',
 				baseUrl: import.meta.env.BASE_URL,
-				bundlePath: bundleUrl,
+				bundlePath: pagefindBundleUrl,
 				showImages: false,
 				translations: this._translations,
 				showSubResults: true,

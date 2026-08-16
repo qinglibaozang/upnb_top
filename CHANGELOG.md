@@ -12,7 +12,9 @@
 - 顶栏搜索框拉长至固定 400px（覆盖 starlight 自身 `max-width: 22rem` 封顶），首页（PC）时水平垂直居中于顶栏
 - 侧边栏 VS Code 文件树化：文件夹/文件行内 SVG 图标（data URI，零网络请求）、隐藏折叠箭头、子级实线引导线（16px 对齐链：margin 1rem 线=图标中心 + 5px padding 补边框位）、选中项浅蓝底圆角块
 - 侧边栏分组标题去数字序号：一级分组在 `astro.config.mjs` 服务端 `folderLabel()` 剥离，autogenerate 嵌套子文件夹由 `zh-optimize.ts` 新增 `stripSidebarNumberPrefixes()` 客户端剥离（astro:page-load，VT 兼容）
-- 侧边栏自动生成：移除 starlight-sidebar-topics 插件，改 `autoSidebar()` 扫描 `src/content/docs` 一级文件夹自动生成分组
+- 侧边栏自动生成：`starlight-sidebar-topics` 插件 + `autoTopics()` 扫描 `src/content/docs` 一级文件夹自动生成顶部分类切换（label 去数字前缀、图标循环分配、递归查找首篇文档生成落地页，支持多层级专题）
+- 固定底栏（`Footer.astro` + `.zh-footer-bar`）：吸在视口底部不随文章上移，与顶部导航栏对称（同高 `--sl-nav-height` 3.5rem、毛玻璃 blur16 + 提饱和、hairline 上边框、向上投影、100vw 防滚动条变窄）；版权+备案居中、编辑链接钉右侧；回到顶部按钮上移至底栏上方；左栏层叠压至 0 防遮挡
+- 测试专题样例：`04.测试专题/`（4 层嵌套 7 篇文章），用于验证多层级侧边栏与分类隔离
 - 文章页描述元信息：10 篇文档 frontmatter 补充 `description` 字段（标题下方展示）
 - TOC 按 vitepress.dev 官网复刻：左 1px 分隔线 + 1rem 内边距；当前项品牌蓝文字 + 2px 品牌蓝 mark 线（`li:has(>a[aria-current=true])::before`，按 `--depth` 变量回退对齐左分隔线，垂直居中当前行）
 
@@ -24,6 +26,14 @@
 - 首页 hero 下方「站点导航」标题删除
 - 顶栏搜索容器改用自定义类 `zh-header-search`（Tailwind `md:max-w-*` 类未被 v4 扫描生成，改纯 CSS 确定控制）
 - TOC 链接清除 starlight 原生 `--depth` 左内边距（`calc(1rem*var(--depth)+.5rem)`），「本页目录」标题与链接左对齐
+- 侧边栏/暗主题图标改 CSS mask 方案：背景图 SVG 内 `stroke='currentColor'` 解析不到宿主颜色恒黑（暗主题不可见），改 `background-color:currentColor` + `mask`（mask 只取形状、颜色随主题）
+- 页面「更新于」时间统一走 git 历史（`lastUpdated: true`）：16 篇文档 frontmatter 手写 `lastUpdated` 时间戳注释保留（不再参与构建）
+- 首页社交图标指向本站仓库（此前为 Starlight 上游占位）；首页 3 处死链修正为真实路径
+- 表格恢复 starlight 原生横向滚动（此前 `display:table` + `overflow:hidden` 导致宽表格无法左右滑）
+- 移动端 TOC 当前项与桌面一致（品牌蓝），桌面/移动端 TOC 基础规则合并共用
+- 代码清理（批次 A）：`book` 无效图标（starlight 无此图标，`<Icon>` 静默渲染空 svg）→ `laptop`；删除 Footer kudos 恒假分支、PageTitle `date` 恒失效回退、Header 无效 `route.currentLocale` 引用、zh.css 死变量与重复 dark 块、`.card:nth-child` 冗余选择器、全站无效 `permalink` 字段、未用 `sharp` 依赖、重复 `start` 脚本、死文件 `_yaml-check.js`
+- 配置注释补全：`tsconfig.json` 每项加中文注释（含 `isolatedModules:false` 关闭原因）、`astro.config.mjs` 补 title/logo/social
+- `Search.astro` pagefind 目录 URL 提取为模块级常量（两处共用）；`serve-preview.mjs` 优化（补 woff2/webp/avif MIME、路径安全检查）并入 `pnpm preview:local`，删除冗余 `start-dev.cmd`
 
 ### 修复
 - 侧边栏「怎么还是粗体」：根因① starlight 默认 `.large`（顶层链接）`font-weight: 600`；根因② CSS minifier 把等于初始值的 `font-weight: 400`（含 `!important`）当冗余删除，删后回落 starlight 600——改用 `var(--zh-fw-sidebar-active)` 间接引用后稳定生效

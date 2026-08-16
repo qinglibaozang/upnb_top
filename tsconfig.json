@@ -1,8 +1,17 @@
 {
+  // 继承 Astro 严格模式基础配置（strict + 模块解析 + 按文件转译相关设置，
+  // 具体见 node_modules/astro/tsconfigs/strict.json）
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
+    // 关闭「独立文件编译」检查（isolatedModules）：
+    // Astro/Vite 用 esbuild 逐文件转译，正常应开启该开关，提前拦截
+    // const enum 等依赖全程序推断、会被独立转译悄悄破坏的语法。
+    // 此处关闭是为规避既有类型错误（node_modules 内 starlight 类型报错、
+    // astro.config.mjs 隐式 any），待错误清理后可改回 true 恢复严格基线
     "isolatedModules": false
   },
+  // 纳入类型检查的文件范围：Astro 自动生成的类型声明 + 全部源码
   "include": [".astro/types.d.ts", "**/*"],
+  // 构建产物不参与类型检查
   "exclude": ["dist"]
 }

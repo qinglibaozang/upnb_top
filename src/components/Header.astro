@@ -14,10 +14,11 @@ import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle'
 import options from 'virtual:starlight-theme-nova/user-config'
 
 const nav = options.nav ?? []
-const route = Astro.locals.starlightRoute
 
-// 处理 nav 的国际化（单语言站点直接取字符串）
-const getText = (v) => (typeof v === 'string' ? v : v?.[route.currentLocale ?? 'root'] ?? v?.root)
+// 处理 nav 的国际化（单语言站点配置全是纯字符串，直接取字符串即可；
+// 兼容 i18n 对象时取 root 键。注：此前实现引用了不存在的 route.currentLocale
+// （恒 undefined 走 root）且 ?? v?.root 是同一键的两次访问——均已简化）
+const getText = (v) => (typeof v === 'string' ? v : v?.root)
 ---
 
 <div class="relative box-border flex h-full items-center gap-2">

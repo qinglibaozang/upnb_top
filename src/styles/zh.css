@@ -86,16 +86,17 @@
 	line-height: 1.75rem;
 }
 
-/* 表格：13px 与代码同级 */
+/* 表格：13px 与代码同级 + 投影增强层次。
+   保留 starlight 默认 display:block + overflow:auto 横向滚动（宽表格可左右滑），
+   只覆盖字号/圆角/边框风格（用户要求：表格横滚修复） */
 .sl-markdown-content table {
-	display: table;
 	width: 100%;
 	font-size: 0.8125rem; /* 13px */
 	line-height: 1.6;
 	border-collapse: separate;
 	border-spacing: 0;
 	border-radius: 0.5rem;
-	overflow: hidden;
+	box-shadow: 0 1px 4px var(--zh-shadow-sm);
 }
 
 .sl-markdown-content thead {
@@ -206,11 +207,6 @@
 	border-radius: 0.375rem;
 }
 
-/* 左侧强调色条：VitePress 风格已弃用（无背景设计），保留规则可恢复 */
-.sidebar-content a[aria-current='page']::before {
-	content: none;
-}
-
 /* 侧边栏分组标题：VitePress 规格（13px 700 大写 + 0.4px 字距，灰色），
    starlight 用 summary 折叠头，视觉与 VitePress .sidebar-heading 一致 */
 .sidebar-content summary .group-label .large {
@@ -222,12 +218,6 @@
 	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
 }
 
-/* ── 4b. Zed 风格文件树图标 ──────────────────────────────
-   文件夹 = summary（可折叠分组），图标随 details[open] 切换
-   （收起：关闭的文件夹 ↔ 展开：打开的文件夹）；
-   文件 = 叶子链接，统一文档线条图标。
-   图标 stroke=currentColor，颜色随文字（亮/暗主题自适应），
-   选中/hover 时与文字一起变品牌蓝 */
 /* ── 4b. VS Code 风格文件树（Explorer） ────────────────────
    用户指定：层级 2-4 层。布局 = [chevron ▸/▾][文件夹图标][名称]，
    文件 = 文档线条图标；缩进虚线（indent guide）；选中/悬停整行高亮块 */
@@ -237,7 +227,11 @@
 	display: none;
 }
 
-/* 分组标题（文件夹）图标：收起态 = 关闭的文件夹 */
+/* 分组标题（文件夹）图标：收起态 = 关闭的文件夹。
+   ⚠ 用 mask 而非 background-image：背景图里的 SVG 是独立文档，
+   currentColor 解析不到宿主颜色恒为黑色（暗主题下看不见），
+   mask 只取 SVG 的 alpha 形状、颜色由 background-color: currentColor
+   决定，真正随文字明暗/主题自适应 */
 .sidebar-content summary .group-label .large::before {
 	content: '';
 	display: inline-block;
@@ -245,15 +239,18 @@
 	height: 1.05em;
 	margin-right: 0.375rem;
 	vertical-align: -0.2em;
-	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E") no-repeat center / contain;
+	background-color: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E") no-repeat center / contain;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
-/* 展开态（details[open]）：打开的文件夹 */
+/* 展开态（details[open]）：打开的文件夹（同 mask 方案） */
 .sidebar-content details[open] summary .group-label .large::before {
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E");
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E") no-repeat center / contain;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
-/* 文件（叶子链接）图标：统一文档线条图标。
+/* 文件（叶子链接）图标：统一文档线条图标（同 mask 方案）。
    顶层（ul.top-level 直接子项，带 .large）与分组内（details ul，无 .large）都覆盖 */
 .sidebar-content :is(ul.top-level, details ul) li > a::before {
 	content: '';
@@ -262,7 +259,9 @@
 	height: 1em;
 	margin-right: 0.375rem;
 	vertical-align: -0.175em;
-	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3C/svg%3E") no-repeat center / contain;
+	background-color: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3C/svg%3E") no-repeat center / contain;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 /* 层级缩进 + 贯穿引导线（indent guide，VS Code 式）：
@@ -302,8 +301,10 @@ starlight-toc nav {
 	position: relative;
 }
 
-/* 标题「本页目录」：VitePress .outline-title——16px（用户要求统一）/600/行高 2.28571，无 margin */
-starlight-toc h2 {
+/* 标题「本页目录」：VitePress .outline-title——16px（用户要求统一）/600/行高 2，无 margin。
+   桌面 starlight-toc 与移动端抽屉 mobile-starlight-toc 是同一组件两形态，规格共用 */
+starlight-toc h2,
+mobile-starlight-toc h2 {
 	font-size: 1rem; /* 16px */
 	font-weight: 600;
 	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
@@ -318,11 +319,13 @@ starlight-toc ul {
 	list-style: none;
 }
 
-/* 链接：VitePress .outline-link——16px（用户要求统一）/400/行高 2.28571、单行截断。
+/* 链接：VitePress .outline-link——16px（用户要求统一）/400/行高 2、单行截断。
    padding:0 必须：starlight 原生给 a 加了 calc(1rem*var(--depth)+.5rem) 的
    左内边距（--depth 缩进），不清掉则链接比标题（nav padding 1rem）再右移 8px，
-   破坏「本页内容标题与链接左对齐」（用户要求与官网一致） */
-starlight-toc a {
+   破坏「本页内容标题与链接左对齐」（用户要求与官网一致）。
+   桌面/移动端同一组件两形态，规格共用 */
+starlight-toc a,
+mobile-starlight-toc a {
 	color: var(--sl-color-gray-2);
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -382,26 +385,14 @@ starlight-toc ul ul a {
 	padding-inline-start: 0.8125rem; /* 13px */
 }
 
-/* 移动端 TOC 抽屉：同右栏规格（无左侧竖线，紧凑） */
-mobile-starlight-toc h2 {
-	font-size: 1rem; /* 16px */
-	font-weight: 600;
-	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
-	color: var(--sl-color-gray-2);
-}
-mobile-starlight-toc a {
-	color: var(--sl-color-gray-2);
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	font-size: 1rem; /* 16px */
-	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
-	transition: color 0.5s;
-	display: block;
-	overflow: hidden;
-}
-mobile-starlight-toc a:hover,
-mobile-starlight-toc a[aria-current='true'] {
+/* 移动端 TOC 抽屉：hover/当前项颜色与桌面端一致
+   （h2 与 a 基础规则已在上方与桌面端合并共用） */
+mobile-starlight-toc a:hover {
 	color: var(--sl-color-gray-1);
+	transition: color 0.25s;
+}
+mobile-starlight-toc a[aria-current='true'] {
+	color: var(--zh-article-active-text); /* 当前项：品牌蓝（同步桌面端，用户要求） */
 	transition: color 0.25s;
 }
 
@@ -524,7 +515,6 @@ mobile-starlight-toc a[aria-current='true'] {
 	   不再出现红蓝混用的"双 accent"（改版前分类选中为红、文章选中为蓝）。 */
 	--zh-brand: hsl(217, 88%, 55%); /* 品牌蓝（中明度，亮暗通用） */
 	--zh-brand-strong: hsl(217, 85%, 40%); /* 深蓝（亮色模式文字用） */
-	--zh-brand-soft: hsl(217, 60%, 94%); /* 浅蓝底（卡片/选中底） */
 	--zh-brand-glow: hsla(217, 88%, 55%, 0.14); /* 蓝色辉光（hover/软底色） */
 
 	/* Starlight accent 三件套统一为品牌蓝（此处为暗色默认值） */
@@ -535,13 +525,10 @@ mobile-starlight-toc a[aria-current='true'] {
 	--zh-line: var(--sl-color-gray-4); /* 全站统一线色 */
 	/* 正文内容宽度：随视口自适应（大屏更宽，中小屏保持舒适） */
 	--sl-content-width: clamp(50rem, 58vw, 72rem);
-	--zh-topic-active-bg: hsl(217, 88%, 55%); /* 分类选中：品牌蓝 */
-	--zh-topic-active-text: #fff;
 	--zh-article-active-text: hsl(217, 90%, 70%); /* 文章选中文字：亮蓝（暗色） */
 	--zh-article-active-bg: hsla(217, 88%, 60%, 0.16);
 	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
 	--zh-shadow-md: rgba(255, 255, 255, 0.12);
-	--zh-shadow-lg: rgba(255, 255, 255, 0.16);
 	--zh-accent-soft: hsla(217, 88%, 60%, 0.13);
 }
 
@@ -551,14 +538,10 @@ mobile-starlight-toc a[aria-current='true'] {
 	--sl-color-accent-high: hsl(217, 80%, 38%);
 	--sl-color-accent-low: hsl(217, 88%, 93%);
 
-	--zh-line: var(--sl-color-gray-4);
-	--zh-topic-active-bg: hsl(217, 88%, 52%);
-	--zh-topic-active-text: #fff;
 	--zh-article-active-text: hsl(217, 85%, 42%); /* 文章选中：品牌深蓝（明色模式） */
 	--zh-article-active-bg: hsla(217, 88%, 52%, 0.1);
 	--zh-shadow-sm: rgba(15, 20, 34, 0.15);
 	--zh-shadow-md: rgba(15, 20, 34, 0.25);
-	--zh-shadow-lg: rgba(15, 20, 34, 0.3);
 	--zh-accent-soft: hsla(217, 88%, 52%, 0.1);
 
 	/* 提示框（aside）语义色：亮色主题低饱和版（商务克制） */
@@ -571,21 +554,7 @@ mobile-starlight-toc a[aria-current='true'] {
 }
 
 :root[data-theme='dark'] {
-	--sl-color-accent: hsl(217, 88%, 62%);
-	--sl-color-accent-high: hsl(217, 90%, 85%);
-	--sl-color-accent-low: hsl(217, 50%, 24%);
-
-	--zh-line: var(--sl-color-gray-4);
-	--zh-topic-active-bg: hsl(217, 88%, 60%);
-	--zh-topic-active-text: #fff;
-	--zh-article-active-text: hsl(217, 90%, 70%);
-	--zh-article-active-bg: hsla(217, 88%, 60%, 0.16);
-	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
-	--zh-shadow-md: rgba(255, 255, 255, 0.12);
-	--zh-shadow-lg: rgba(255, 255, 255, 0.16);
-	--zh-accent-soft: hsla(217, 88%, 60%, 0.13);
-
-	/* 提示框（aside）语义色：暗色主题低饱和版 */
+	/* 提示框（aside）语义色：暗色主题低饱和版（其余变量与基础 :root 暗色默认相同） */
 	--zh-tip: hsl(160, 55%, 55%);
 	--zh-tip-accent: hsl(160, 55%, 80%);
 	--zh-caution: hsl(38, 75%, 55%);
@@ -605,11 +574,71 @@ header {
 	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
 
+/* 固定底栏（Footer.astro .zh-footer-bar，吸在视口底部）预留空间：
+   正文/首页底部 padding 加大，避免文章末尾与分页导航被底栏遮挡 */
+main {
+	padding-bottom: 4.5rem; /* 底栏约 2.5rem 高 + 1.5rem 呼吸间距 */
+}
+
+/* 固定底栏本身（样式放全局而非组件 scoped，规避 @layer/scoped 组合的层叠坑；
+   选择器直接命中，unlayered 优先级最高）：
+   吸在视口底部、不随文章滚动上移，样式对齐顶部导航栏
+   （毛玻璃 blur16 + 提饱和、78% 不透明底、hairline 上边框、向上投影、100vw 防变窄） */
+.zh-footer-bar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2147483647 !important; /* 必须绝对最上层：左侧边栏（fixed，z-index 曾压过底栏）
+	                                 盖住底栏；实测需将左栏压到 z-index:0 后底栏才可见 */
+	width: 100vw;
+	height: var(--sl-nav-height); /* 与顶部导航栏同高（3.5rem，用户要求） */
+	flex-direction: row;
+	align-items: center;
+	justify-content: center; /* 页脚信息（版权+备案）居中（用户要求） */
+	flex-wrap: wrap;
+	gap: 0.5rem 1.5rem;
+	padding: 0 1.25rem;
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+	border-top: 1px solid var(--zh-line);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 78%, transparent);
+	backdrop-filter: blur(16px) saturate(1.5);
+	-webkit-backdrop-filter: blur(16px) saturate(1.5);
+	box-shadow: 0 -2px 8px var(--zh-shadow-md);
+}
+.zh-footer-bar__brand {
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.5rem 1.5rem;
+}
+.zh-footer-bar a {
+	color: inherit;
+	text-decoration: none;
+}
+.zh-footer-bar a:hover {
+	color: var(--sl-color-white);
+}
+.zh-footer-bar__edit {
+	position: absolute; /* 编辑链接钉在底栏右侧，不挤占居中的页脚信息 */
+	right: 1.25rem;
+	top: 50%;
+	transform: translateY(-50%);
+}
+@media print {
+	.zh-footer-bar {
+		display: none;
+	}
+}
+
 /* 三栏分割线：已去除（用户要求），左侧边栏与右侧 TOC 均无边线、无投影，
    视觉上三栏融为一个整体；保留规则可随时恢复 */
 #starlight__sidebar {
 	border-color: transparent;
 	box-shadow: none;
+	/* 左栏层叠必须压到 0：左栏 fixed 延伸到视口底部（top:顶栏/bottom:0），
+	   实测其层叠高于常规 z-index（曾盖住底栏），必须低于固定底栏（z-index 极限） */
+	z-index: 0 !important;
 }
 
 .right-sidebar {
@@ -633,12 +662,10 @@ header {
 }
 
 /* 卡片：统一品牌蓝（覆盖 starlight 默认按 nth-child 轮换的橙/绿/红/蓝多彩），
-   柔和浮起 + hover 上浮，参考大厂文档站卡片 */
-.sl-markdown-content .card,
-.sl-markdown-content .card:nth-child(4n + 1),
-.sl-markdown-content .card:nth-child(4n + 3),
-.sl-markdown-content .card:nth-child(4n + 4),
-.sl-markdown-content .card:nth-child(4n + 5) {
+   柔和浮起 + hover 上浮，参考大厂文档站卡片。
+   注：只写裸 .card 即可——unlayered 特异性 (0,2,0) 与 starlight 的
+   .card:nth-child(4n+…) 相同且 unlayered 必胜；nth-child 变体是冗余 */
+.sl-markdown-content .card {
 	--sl-card-border: var(--sl-color-accent);
 	--sl-card-bg: var(--sl-color-accent-low);
 	border-radius: 0.75rem;
@@ -758,11 +785,6 @@ html[data-has-hero] .sl-markdown-content .card:hover::before {
 	box-shadow: 0 2px 8px var(--zh-shadow-md);
 }
 
-/* 表格：加投影增强层次 */
-.sl-markdown-content table {
-	box-shadow: 0 1px 4px var(--zh-shadow-sm);
-}
-
 /* 右栏目录 TOC：隐藏「概述」项
    第一层：直接隐藏链接（兼容不支持 :has 的旧浏览器/内置 WebView）
    第二层：现代浏览器隐藏整个 li，避免留空行 */
@@ -780,7 +802,7 @@ mobile-starlight-toc li:has(a[href='#_top']) {
 .zh-back-top {
 	position: fixed;
 	right: 1.5rem;
-	bottom: 1.5rem;
+	bottom: calc(var(--sl-nav-height) + 1rem); /* 底栏与顶栏同高（3.5rem），按钮悬在底栏上方 */
 	width: 3rem;
 	height: 3rem;
 	border-radius: 50%;

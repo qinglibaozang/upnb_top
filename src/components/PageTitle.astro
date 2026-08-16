@@ -11,11 +11,11 @@ const { entry, lastUpdated, lang } = Astro.locals.starlightRoute;
 const title = entry.data.title;
 const description = entry.data.description as string | undefined;
 
-// 更新时间：优先 starlight 标准 lastUpdated（frontmatter 或 git 历史），
-// 缺失时回退到内容里的 date 字段（本项目文章 frontmatter 常用 date: YYYY-MM-DD）
-const rawDate: Date | string | undefined =
-	(lastUpdated as Date | undefined) ?? (entry.data as { date?: Date | string }).date;
-const metaDate: Date | undefined = rawDate instanceof Date ? rawDate : rawDate ? new Date(String(rawDate)) : undefined;
+// 更新时间：直接取 starlight 标准 lastUpdated（frontmatter 或 git 历史生成）。
+// 注：此前有「回退到 frontmatter date 字段」的分支——该字段未在 content schema 注册，
+// 会被 Zod 剥离恒为 undefined，分支恒不生效（死代码），已删除。
+const metaDate: Date | undefined =
+	lastUpdated instanceof Date ? lastUpdated : lastUpdated ? new Date(String(lastUpdated)) : undefined;
 ---
 
 <h1 id="_top" data-page-title>{title}</h1>
