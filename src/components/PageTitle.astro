@@ -10,6 +10,10 @@ const { entry, lastUpdated, lang } = Astro.locals.starlightRoute;
 
 const title = entry.data.title;
 const description = entry.data.description as string | undefined;
+// jieba 中文分词关键词（content loader 构建时生成）：隐藏注入页面，
+// Pagefind 构建索引时按 HTML 解析（不看渲染/隐藏），分词词被索引为独立词，
+// 配合查询端 jieba 分词实现中文短词/组合词召回
+const searchKeywords = entry.data.searchKeywords ?? [];
 
 // 更新时间：直接取 starlight 标准 lastUpdated（frontmatter 或 git 历史生成）。
 // 注：此前有「回退到 frontmatter date 字段」的分支——该字段未在 content schema 注册，
@@ -19,6 +23,13 @@ const metaDate: Date | undefined =
 ---
 
 <h1 id="_top" data-page-title>{title}</h1>
+
+<!-- 搜索分词注入：hidden 对 Pagefind 无影响（HTML 解析层索引），aria-hidden 防屏幕阅读器朗读 -->
+{
+	searchKeywords.length > 0 && (
+		<div class="zh-search-words" hidden aria-hidden="true">{searchKeywords.join(' ')}</div>
+	)
+}
 
 {
 	description && <p class="zh-page-desc">{description}</p>

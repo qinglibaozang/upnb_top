@@ -72,6 +72,30 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 	// 预取（initPagefind）与 UI 初始化（_initUI）两处共用，避免重复计算
 	const pagefindBundleUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
 
+	// ── jieba 查询端分词（中文短词/组合词召回）──
+	// 与构建端（content loader 的 @node-rs/jieba）同一词典内核（jieba-rs），
+	// 保证索引词与查询词一致。wasm 约 3.8MB（含词典），懒加载 + 页面挂载后预取；
+	// 未就绪时 processTerm 原样返回（Pagefind 降级按整串分段查询，不影响功能）
+	let jiebaCut: ((text: string, hmm?: boolean) => string[]) | null = null;
+	let jiebaLoad: Promise<void> | null = null;
+	function preloadJieba() {
+		if (!jiebaLoad) {
+			jiebaLoad = (async () => {
+				// @ts-expect-error — jieba-wasm/web 无 exports.types 映射，类型按 any 处理
+				const [mod, wasm] = await Promise.all([
+					import('jieba-wasm/web'),
+					// 相对路径导入绕过 package exports 字段：
+					// jieba-wasm 的 exports 未开放 ./pkg/web/* 子路径，包名导入 wasm 会被
+					// rolldown 以「not exported under conditions」拒绝；相对路径走文件解析
+					import('../../node_modules/jieba-wasm/pkg/web/jieba_rs_wasm_bg.wasm?url'),
+				]);
+				await mod.default(wasm.default);
+				jiebaCut = mod.cut;
+			})();
+		}
+		return jiebaLoad;
+	}
+
 	class SiteSearch extends HTMLElement {
 		openModal!: (event?: MouseEvent) => void;
 		closeModal!: () => void;
@@ -158,6 +182,9 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 		connectedCallback() {
 			this.showShortcut();
 			this.initPagefind();
+			// 后台预取 jieba-wasm（~3.8MB）：保证用户首次输入时查询端分词已就绪，
+			// 失败静默——未就绪时 processTerm 原样返回，搜索功能不受影响
+			preloadJieba().catch(() => {});
 		}
 
 		/**
@@ -215,7 +242,41 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 						return sub_result;
 					});
 				},
+				// jieba 查询端分词：用户输入「学习资源」→ 切为「学习 资源」多词查询。
+				// PagefindUI 的 processTerm 是同步钩子，jieba 未就绪时原样返回（降级）
+				processTerm: (term: string) => {
+					if (!jiebaCut || !/[\u4e00-\u9fa5]/.test(term)) return term;
+					try {
+						return jiebaCut(term, true)
+							.filter((w) => w.trim().length > 0)
+							.join(' ');
+					} catch {
+						return term;
+					}
+				},
 			});
+			// 监听 PagefindUI 输入框：把查询词写入 sessionStorage，
+			// 目标页（zh-optimize.ts applySearchHighlight）读取后高亮正文命中词。
+			// 输入框是 PagefindUI（svelte）异步渲染的，轮询重试直到出现（上限 30 次）
+			const bindSearchInput = (attempt = 0) => {
+				if (attempt > 30) return;
+				const input = document.querySelector<HTMLInputElement>(
+					'#starlight__search .pagefind-ui__search-input',
+				);
+				if (!input) {
+					setTimeout(() => bindSearchInput(attempt + 1), 200);
+					return;
+				}
+				input.addEventListener('input', () => {
+					const q = input.value.trim();
+					if (q) {
+						try {
+							sessionStorage.setItem('zh-search-hl', q);
+						} catch {}
+					}
+				});
+			};
+			bindSearchInput();
 		}
 	}
 	customElements.define('site-search', SiteSearch);

@@ -375,6 +375,115 @@ function stripSidebarNumberPrefixes() {
 	}
 }
 
+/* ── 搜索结果跳转高亮 ──
+   流程：Search.astro 把用户输入写入 sessionStorage（zh-search-hl）→
+   目标页 astro:page-load 时读取并清除 → 高亮正文纯文本中的查询词 →
+   锚点优先滚动（URL 带 hash 滚小标题；无 hash 滚首个命中词居中）。
+   与备份项目（Algolia DocSearch 版 doHL）的区别：不 replaceChild 整个文本节点
+   （会拆坏链接/代码内部结构），而是 TreeWalker 只收集「安全」的纯文本节点
+   （跳过 code/pre/a/button/标题等），只替换文本节点本身，结构不受影响 */
+const SEARCH_HL_KEY = 'zh-search-hl';
+
+/** 跳过高亮的安全区域：代码、链接、按钮、标题（用户选项：标题不动）、
+    隐藏分词注入、脚本样式、以及已存在的 mark（避免嵌套） */
+const HL_SKIP_SELECTOR =
+	'code, pre, a, button, h1, h2, h3, h4, h5, h6, mark, .zh-search-words, script, style, svg, kbd, samp';
+
+/** 在单个文本节点内高亮所有查询词：纯字符串分段 → <mark class="zh-search-hl">。
+    只替换该文本节点本身（replaceWith），不触碰父结构，天然安全 */
+function highlightTextNode(node: Text, words: string[]): boolean {
+	const original = node.textContent ?? '';
+	if (!original) return false;
+	type Seg = { text: string; hl: boolean };
+	let segs: Seg[] = [{ text: original, hl: false }];
+	let changed = false;
+	for (const word of words) {
+		if (!word) continue;
+		const next: Seg[] = [];
+		for (const seg of segs) {
+			if (seg.hl) {
+				next.push(seg);
+				continue;
+			}
+			let rest = seg.text;
+			let idx = rest.indexOf(word);
+			while (idx >= 0) {
+				if (idx > 0) next.push({ text: rest.slice(0, idx), hl: false });
+				next.push({ text: word, hl: true });
+				changed = true;
+				rest = rest.slice(idx + word.length);
+				idx = rest.indexOf(word);
+			}
+			if (rest) next.push({ text: rest, hl: false });
+		}
+		segs = next;
+	}
+	if (!changed) return false;
+	const frag = document.createDocumentFragment();
+	for (const seg of segs) {
+		if (seg.hl) {
+			const mark = document.createElement('mark');
+			mark.className = 'zh-search-hl';
+			mark.textContent = seg.text;
+			frag.appendChild(mark);
+		} else if (seg.text) {
+			frag.appendChild(document.createTextNode(seg.text));
+		}
+	}
+	node.replaceWith(frag);
+	return true;
+}
+
+/** 读取 sessionStorage 中的搜索词并高亮正文，锚点优先滚动到命中处。
+    返回是否发生了高亮（供滚动逻辑判断） */
+export function applySearchHighlight(root: ParentNode = document): boolean {
+	let query = '';
+	try {
+		query = sessionStorage.getItem(SEARCH_HL_KEY) ?? '';
+		sessionStorage.removeItem(SEARCH_HL_KEY);
+	} catch {
+		return false;
+	}
+	const words = query
+		.split(/\s+/)
+		.map((w) => w.trim())
+		.filter((w) => w.length > 0);
+	if (words.length === 0) return false;
+
+	// 正文容器（无则退回整页；首页/404 等无正文页面自然跳过）
+	const content = (root as Document).querySelector?.('.sl-markdown-content') ?? root;
+	const walker = (root as Document).createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+		acceptNode(node) {
+			const parent = node.parentElement;
+			if (parent && parent.closest(HL_SKIP_SELECTOR)) return NodeFilter.FILTER_REJECT;
+			return NodeFilter.FILTER_ACCEPT;
+		},
+	});
+	const textNodes: Text[] = [];
+	let node: Node | null;
+	while ((node = walker.nextNode())) textNodes.push(node as Text);
+
+	let highlighted = 0;
+	for (const tn of textNodes) {
+		if (highlightTextNode(tn, words)) highlighted++;
+	}
+	if (highlighted === 0) return false;
+
+	// 锚点优先滚动：URL 带 #hash（Pagefind 子结果/小标题锚点）滚到锚点；
+	// 否则滚到首个命中词并居中显示
+	const scrollTarget = () => {
+		const hash = (root as Document).location?.hash;
+		const anchor = hash ? (root as Document).querySelector(hash) : null;
+		const target = (anchor ?? (root as Document).querySelector('mark.zh-search-hl')) as Element | null;
+		if (!target) return;
+		// 内容区有 sticky 顶栏：用 block:center 居中避开顶栏遮挡（比 start 稳）
+		target.scrollIntoView({ behavior: 'smooth', block: anchor ? 'start' : 'center' });
+	};
+	// 等一帧再滚：VT 切页后浏览器可能重置滚动位置，延迟到 swap 完成后执行更稳
+	requestAnimationFrame(() => requestAnimationFrame(scrollTarget));
+	return true;
+}
+
 function init() {
 	// 清理上次导航残留的 window/document 监听器（VT 切页时 window/document 不换，
 	// 只有 body 内容被替换，避免监听器累积导致重复执行/内存泄漏）
@@ -387,6 +496,7 @@ function init() {
 	removeTocOverview();
 	initMobileMenuKeep();
 	stripSidebarNumberPrefixes();
+	applySearchHighlight();
 }
 
 let backTopCleanup: (() => void) | null = null;

@@ -1141,3 +1141,15 @@ html:not([data-has-hero]) [data-page-title] {
 	font-size: 0.8125rem;
 	color: var(--sl-color-gray-3);
 }
+
+/* ── 搜索结果跳转高亮（zh-optimize.ts applySearchHighlight 注入）──
+   只作用于正文文本，链接/代码/标题内不注入（脚本侧已跳过），
+   品牌蓝浅底 + 深蓝字，与搜索结果弹层内 Pagefind 自带 mark 样式分开 */
+mark.zh-search-hl {
+	background-color: color-mix(in srgb, var(--sl-color-accent) 18%, transparent);
+	color: var(--sl-color-accent-high);
+	border-radius: 0.2em;
+	padding: 0 0.1em;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+}

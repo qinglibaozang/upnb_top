@@ -17,6 +17,8 @@
 - 测试专题样例：`04.测试专题/`（4 层嵌套 7 篇文章），用于验证多层级侧边栏与分类隔离
 - 文章页描述元信息：10 篇文档 frontmatter 补充 `description` 字段（标题下方展示）
 - TOC 按 vitepress.dev 官网复刻：左 1px 分隔线 + 1rem 内边距；当前项品牌蓝文字 + 2px 品牌蓝 mark 线（`li:has(>a[aria-current=true])::before`，按 `--depth` 变量回退对齐左分隔线，垂直居中当前行）
+- 搜索 jieba 中文分词增强：① 构建端 `@node-rs/jieba` 在 content loader 里对每篇文档（标题+描述+正文去 markdown）分词，生成 `searchKeywords` 并注入页面隐藏元素，Pagefind 索引为独立词——解决 Pagefind 按 Unicode 分段把连续汉字整串索引、短词查询（如「学习」）不命中的问题；② 查询端 `jieba-wasm`（浏览器，约 3.8MB 懒加载预取）通过 PagefindUI `processTerm` 把输入切成空格分隔多词（「学习资源」→「学习 资源」），与索引词一致，组合词/短词都能召回；未就绪时降级原词查询
+- 搜索结果跳转高亮：搜索框输入写入 sessionStorage，目标页 `astro:page-load` 时读取 → TreeWalker 只高亮正文纯文本中的命中词（跳过链接/代码/按钮/标题，不破坏元素内部结构，区别于备份项目 replaceChild 方案）→ 品牌蓝 `<mark class="zh-search-hl">`；滚动锚点优先（URL 带 hash 滚小标题，无 hash 滚首个命中词居中）
 
 ### 变更
 - 移除首页 hero 下方大搜索框（含 `.zh-home-search` 整套样式），搜索入口统一为顶栏搜索框
