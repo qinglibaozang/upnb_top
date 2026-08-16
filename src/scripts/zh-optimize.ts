@@ -361,6 +361,20 @@ function walk(root: HTMLElement) {
 	});
 }
 
+/**
+ * 侧边栏分组标题去数字序号前缀（01.prompt → prompt）：
+ * 一级分组 label 已在 astro.config.mjs 服务端去前缀，autogenerate 的嵌套子文件夹
+ * （如 03.AI专区/01.prompt）由 starlight 自动用文件夹名渲染，序号这里统一清掉。
+ * 放在 page-load 里执行：首次加载与 VT 切页后新 DOM 都被处理。
+ */
+function stripSidebarNumberPrefixes() {
+	for (const el of document.querySelectorAll('.sidebar-content summary .group-label .large')) {
+		const text = el.textContent ?? '';
+		const cleaned = text.replace(/^\d+[.\s-]*/, '');
+		if (cleaned !== text) el.textContent = cleaned;
+	}
+}
+
 function init() {
 	// 清理上次导航残留的 window/document 监听器（VT 切页时 window/document 不换，
 	// 只有 body 内容被替换，避免监听器累积导致重复执行/内存泄漏）
@@ -372,6 +386,7 @@ function init() {
 	initBackTop();
 	removeTocOverview();
 	initMobileMenuKeep();
+	stripSidebarNumberPrefixes();
 }
 
 let backTopCleanup: (() => void) | null = null;

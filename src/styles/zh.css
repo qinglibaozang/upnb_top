@@ -165,33 +165,34 @@
 }
 
 /* ── 4. 左栏侧边栏（导航层级） ──────────────────────────────
-   链接 14px：与正文 15px 配套（93%），大厂主流档位
-   分组标题保持 12px，拉开层级差
+   仿 VitePress：链接 14px 常规字重、无胶囊背景，hover/选中仅文字变品牌蓝；
+   分组标题 13px 700 大写（VitePress .sidebar-heading 规格）
    数字等宽（tabular-nums）：条目/分组名含数字时宽度统一，列表更整齐 */
 .sidebar-content {
 	font-variant-numeric: tabular-nums;
 }
 
-.sidebar-content a.large {
-	font-size: 1rem; /* 16px：恢复 starlight .large 原字号（只去粗，不缩小） */
+.sidebar-content a.large,
+.sidebar-content :is(ul.top-level, details ul) li > a {
+	font-size: 1rem; /* 16px（用户调整 +2px） */
 	/* 顶层链接带 starlight 的 .large 类（font-weight:600 大号粗体设计），
-	   这里用与选中态同款的 var() 间接写法覆盖为 400（直接写 400 会被 minifier 删除） */
+	   这里用与选中态同款的 var() 间接写法覆盖为 400（直接写 400 会被 minifier 删除）；
+	   分组内链接（无 .large 类）也一并统一 */
 	font-weight: var(--zh-fw-sidebar-active);
-	line-height: 1.4; /* starlight 原紧凑行高 */
+	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
 	height: auto;
-	border-radius: 0.5rem; /* 胶囊圆角 */
-	transition:
-		background-color 0.15s ease,
-		color 0.15s ease;
+	padding: 0.1875rem 0.5rem; /* 紧凑点击热区，无胶囊底 */
+	border-radius: 0;
+	transition: color 0.15s ease;
 }
 
-/* 链接悬停：柔和浅底（中性灰 18% 透明度，亮/暗主题自适应），导航反馈更清晰 */
-.sidebar-content a.large:hover {
+/* 链接悬停：VS Code 风格——淡背景行，文字不变色 */
+.sidebar-content a.large:hover,
+.sidebar-content :is(ul.top-level, details ul) li > a:hover {
 	background-color: color-mix(in srgb, var(--sl-color-gray-5) 18%, transparent);
 }
 
-/* 文章标题选中：浅蓝底 + 品牌蓝字 + 左侧色条（不加粗——区分靠颜色与色条，
-   加粗只留给文件夹分组标题。
+/* 文章标题选中：VS Code 风格——整行高亮块（淡色圆角底 + 品牌蓝字，不加粗）。
    注意：font-weight 必须用 var() 间接写法（--zh-fw-sidebar-active: 400），
    直接写 font-weight:400（=初始值）会被 CSS minifier 当冗余删除，删掉后
    回落为 starlight 默认 @layer starlight.core 的 [aria-current='page'] 600；
@@ -199,70 +200,209 @@
 .sidebar-content a[aria-current='page'],
 .sidebar-content a[aria-current='page']:hover,
 .sidebar-content a[aria-current='page']:focus {
-	position: relative;
 	font-weight: var(--zh-fw-sidebar-active);
 	color: var(--zh-article-active-text);
 	background-color: var(--zh-article-active-bg);
+	border-radius: 0.375rem;
 }
 
-/* 左侧强调色条：直角——用伪元素画（伪元素不受 border-radius 裁剪），
-   inset box-shadow 会被链接圆角裁成弧形（"倒角"），故弃用 */
+/* 左侧强调色条：VitePress 风格已弃用（无背景设计），保留规则可恢复 */
 .sidebar-content a[aria-current='page']::before {
-	content: '';
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	width: 3px;
-	border-radius: 0;
-	background: var(--zh-article-active-text);
+	content: none;
 }
 
-/* 侧边栏分组标题：小标签化（12px 灰色加粗 + 字距），与正文层级拉开 */
+/* 侧边栏分组标题：VitePress 规格（13px 700 大写 + 0.4px 字距，灰色），
+   starlight 用 summary 折叠头，视觉与 VitePress .sidebar-heading 一致 */
 .sidebar-content summary .group-label .large {
-	font-size: 0.75rem; /* 12px */
-	font-weight: 600;
-	letter-spacing: 0.08em;
+	font-size: 1rem; /* 16px（用户要求：左右边栏统一 16px；700 大写 + 0.4px 字距） */
+	font-weight: 700;
+	letter-spacing: 0.4px;
 	color: var(--sl-color-gray-3);
 	text-transform: uppercase; /* 中文无影响；英文分组名呈小标签风格 */
+	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
 }
 
-/* ── 5. 右栏目录 TOC（定位层级） ────────────────────────────
-   16px：与侧边栏同字号（用户调整）；行高/微字距与左栏对称；数字等宽与侧边栏一致 */
+/* ── 4b. Zed 风格文件树图标 ──────────────────────────────
+   文件夹 = summary（可折叠分组），图标随 details[open] 切换
+   （收起：关闭的文件夹 ↔ 展开：打开的文件夹）；
+   文件 = 叶子链接，统一文档线条图标。
+   图标 stroke=currentColor，颜色随文字（亮/暗主题自适应），
+   选中/hover 时与文字一起变品牌蓝 */
+/* ── 4b. VS Code 风格文件树（Explorer） ────────────────────
+   用户指定：层级 2-4 层。布局 = [chevron ▸/▾][文件夹图标][名称]，
+   文件 = 文档线条图标；缩进虚线（indent guide）；选中/悬停整行高亮块 */
+/* caret（chevron）隐藏：不要箭头（用户要求）。
+   展开/收起状态改由文件夹图标切换表达（details[open] 换打开的文件夹） */
+.sidebar-content summary .caret {
+	display: none;
+}
+
+/* 分组标题（文件夹）图标：收起态 = 关闭的文件夹 */
+.sidebar-content summary .group-label .large::before {
+	content: '';
+	display: inline-block;
+	width: 1.05em;
+	height: 1.05em;
+	margin-right: 0.375rem;
+	vertical-align: -0.2em;
+	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* 展开态（details[open]）：打开的文件夹 */
+.sidebar-content details[open] summary .group-label .large::before {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E");
+}
+
+/* 文件（叶子链接）图标：统一文档线条图标。
+   顶层（ul.top-level 直接子项，带 .large）与分组内（details ul，无 .large）都覆盖 */
+.sidebar-content :is(ul.top-level, details ul) li > a::before {
+	content: '';
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	margin-right: 0.375rem;
+	vertical-align: -0.175em;
+	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* 层级缩进 + 贯穿引导线（indent guide，VS Code 式）：
+   子列表整体相对父文件夹缩进，引导线（实线）从父文件夹**图标中心**正下方贯穿
+   该层所有子项；多层嵌套逐层累加。
+   ⚠ margin 固定 16px（线=图标中心，用户明确要求不可再动），只调 padding。
+   对齐链（产物实测，border-box）：line margin 16 → border 1 → ul padding P → li margin 0 → a padding 8 → 图标；
+   目标子图标 = 父文字左边缘 ≈ 30px；P = 30 − 16 − 1 − 0 − 8 = 5px */
+.sidebar-content details ul {
+	margin-inline-start: 1rem; /* 16px：线对齐父文件夹图标中心（固定，勿改） */
+	padding-inline-start: 0.3125rem; /* 5px：子级图标与父级文字左对齐（含 border 1px） */
+	border-inline-start: 1px solid var(--zh-line); /* 实线引导线 */
+}
+
+/* 取消 starlight 默认的嵌套规则副作用（ul ul li 的每行竖线 + 额外 8px margin），
+   避免与 details ul 的贯穿引导线叠加/破坏对齐计算 */
+.sidebar-content ul ul li {
+	border-inline-start: none;
+	margin-inline-start: 0;
+}
+
+/* ── 5. 右栏目录 TOC（复刻 VitePress v2 官网 vitepress.dev 大纲，实测 style.css） ──
+   容器左侧 1px 分隔线 + 左内边距 1rem（.content）；
+   标题 14px/600/行高 2.28571（.outline-title，无居中无分隔线）；
+   链接 14px/400/行高 2.28571、nowrap+ellipsis（.outline-link）；
+   hover 与当前项同为深灰（VitePress 品牌色只用于滚动指示条 marker）；
+   当前项前加静态 2px 品牌蓝圆角条贴左分隔线（.outline-marker 静态近似）；
+   h3 嵌套：容器 1rem + 链接 13px（.nested） */
 starlight-toc {
 	font-variant-numeric: tabular-nums;
 }
 
-starlight-toc a {
-	font-size: 1rem; /* 16px */
-	line-height: 1.45;
-	letter-spacing: 0.005em;
+/* 容器：左侧分隔线 + 内边距（VitePress .VPDocAsideOutline .content） */
+starlight-toc nav {
+	border-inline-start: 1px solid var(--sl-color-hairline);
+	padding-inline-start: 1rem;
+	position: relative;
 }
 
-/* 移动端 TOC 抽屉：同 16px，与右栏一致 */
-mobile-starlight-toc a {
-	font-size: 1rem;
-}
-
-/* TOC 当前项：浅蓝底 + 品牌蓝字（starlight 用 aria-current=true 标记滚动定位中的标题） */
-starlight-toc a[aria-current='true'] {
-	color: var(--zh-article-active-text);
-	background-color: var(--zh-article-active-bg);
-	font-weight: 600;
-	border-radius: 0.375rem;
-}
-
-/* TOC 标题「本页目录」：16px，与目录项同字号（用户调整）；字重 600 + 字距保持小标签质感 */
+/* 标题「本页目录」：VitePress .outline-title——16px（用户要求统一）/600/行高 2.28571，无 margin */
 starlight-toc h2 {
 	font-size: 1rem; /* 16px */
 	font-weight: 600;
-	letter-spacing: 0.08em;
-	color: var(--sl-color-gray-3);
+	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
+	color: var(--sl-color-gray-2);
+	margin: 0; /* 官网 .outline-title 为 div，无 margin；清掉 starlight h2 默认间距 */
 }
 
-/* 移动端 TOC 抽屉标题：同步 16px */
+/* 列表：清默认（官网 ul.root 无 margin/padding/list-style） */
+starlight-toc ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* 链接：VitePress .outline-link——16px（用户要求统一）/400/行高 2.28571、单行截断。
+   padding:0 必须：starlight 原生给 a 加了 calc(1rem*var(--depth)+.5rem) 的
+   左内边距（--depth 缩进），不清掉则链接比标题（nav padding 1rem）再右移 8px，
+   破坏「本页内容标题与链接左对齐」（用户要求与官网一致） */
+starlight-toc a {
+	color: var(--sl-color-gray-2);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: 1rem; /* 16px */
+	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
+	transition: color 0.5s;
+	display: block;
+	overflow: hidden;
+	padding: 0; /* 清掉 starlight --depth 缩进与 padding-block */
+}
+
+/* hover：VitePress——变深灰（.outline-link:hover） */
+starlight-toc a:hover {
+	color: var(--sl-color-gray-1);
+	background-color: transparent;
+	border-radius: 0;
+	transition: color 0.25s;
+}
+
+/* 当前项：品牌蓝文字（滚动定位更新 aria-current 时随动变色） */
+starlight-toc a[aria-current='true'] {
+	color: var(--zh-article-active-text);
+	background-color: transparent;
+	border-radius: 0;
+	transition: color 0.25s;
+}
+
+/* 当前项 mark 线：VitePress .outline-marker 静态版——
+   2px 品牌蓝圆角条骑在左分隔线上。放 li 上而非 a：
+   a 有 overflow:hidden（ellipsis 必需），::before 在 a 上会被裁剪看不见；
+   li 无 overflow，marker 可正常显示。
+   ⚠ 必须用直接子级匹配 :has(> a)：
+   普通 :has(a) 是后代匹配，h2 的 li 会因内部 h3 的 a 是当前项而误匹配，
+   导致出现两层蓝条且外层（高度含 h3 区）垂直居中跑偏到 h3 上。
+   li 自带 --depth（starlight 缩进变量），left 按深度回退：
+   depth 0 → -1rem-1px（到 nav 左边界）；depth 1 → -2rem-1px …… 逐层对齐左分隔线 */
+starlight-toc li:has(> a[aria-current='true']) {
+	position: relative;
+}
+starlight-toc li:has(> a[aria-current='true'])::before {
+	content: '';
+	position: absolute;
+	left: calc(-1rem * (var(--depth, 0) + 1) - 1px);
+	top: 50%;
+	transform: translateY(-50%);
+	width: 2px;
+	height: 1.125rem;
+	background-color: var(--zh-article-active-text);
+	border-radius: 2px;
+}
+
+/* h3 嵌套：VitePress .nested——容器左移 1rem + 链接再左移 13px */
+starlight-toc ul ul {
+	margin-inline-start: 1rem;
+}
+starlight-toc ul ul a {
+	padding-inline-start: 0.8125rem; /* 13px */
+}
+
+/* 移动端 TOC 抽屉：同右栏规格（无左侧竖线，紧凑） */
 mobile-starlight-toc h2 {
-	font-size: 1rem;
+	font-size: 1rem; /* 16px */
+	font-weight: 600;
+	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
+	color: var(--sl-color-gray-2);
+}
+mobile-starlight-toc a {
+	color: var(--sl-color-gray-2);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: 1rem; /* 16px */
+	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
+	transition: color 0.5s;
+	display: block;
+	overflow: hidden;
+}
+mobile-starlight-toc a:hover,
+mobile-starlight-toc a[aria-current='true'] {
+	color: var(--sl-color-gray-1);
+	transition: color 0.25s;
 }
 
 /* ── 6. 辅助细节 ──────────────────────────────────────────── */
@@ -322,10 +462,10 @@ mobile-starlight-toc h2 {
 		max-width: 400px;
 	}
 
-	/* 首页（splash，html[data-has-hero]）PC 端：搜索框水平垂直居中于顶栏。
-	   脱离文档流后工具区恢复为 主题+社交+语言，搜索框精确居中；
-	   仅首页生效，文档页顶栏搜索仍在右侧 */
-	html[data-has-hero] .zh-header-search {
+	/* 全站 PC 端（≥50rem）：顶栏搜索框水平垂直居中。
+	   脱离文档流后工具区恢复为 主题+社交+语言，搜索框精确居中于顶栏；
+	   移动端不受影响（50rem 以上才应用，保持默认小图标布局） */
+	.zh-header-search {
 		position: absolute;
 		left: 50%;
 		top: 50%;
@@ -465,16 +605,16 @@ header {
 	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
 
-/* 左侧边栏右边框：统一线色 + 向右投影 */
+/* 三栏分割线：已去除（用户要求），左侧边栏与右侧 TOC 均无边线、无投影，
+   视觉上三栏融为一个整体；保留规则可随时恢复 */
 #starlight__sidebar {
-	border-color: var(--zh-line);
-	box-shadow: 2px 0 8px var(--zh-shadow-md);
+	border-color: transparent;
+	box-shadow: none;
 }
 
-/* 右侧目录左边框：与左侧完全对称（线在 .right-sidebar 内层，覆盖 nova 的 hairline） */
 .right-sidebar {
-	border-inline-start-color: var(--zh-line);
-	box-shadow: -2px 0 8px var(--zh-shadow-md);
+	border-inline-start-color: transparent;
+	box-shadow: none;
 }
 
 /* 搜索框：内阴影凹陷（线框感）——仅桌面端（移动端只显示放大镜图标，避免出现突兀的框） */
@@ -928,43 +1068,19 @@ html[data-has-hero] .hero .actions a svg {
 }
 
 /* ── 11. 文章页头部（元信息，配合 PageTitle.astro） ──
-   面包屑：已关闭（用户要求；保留组件与逻辑，需要时可恢复 display:flex） */
-.zh-breadcrumbs {
-	display: none;
-}
+   （面包屑导航已删除：PageTitle.astro 组件同步移除，此处样式一并清理）
+ */
 
-.zh-breadcrumbs a {
-	color: var(--sl-color-gray-3);
-	text-decoration: none;
-	transition: color 0.15s ease;
-}
-
-.zh-breadcrumbs a:hover {
-	color: var(--zh-article-active-text);
-}
-
-.zh-breadcrumbs .zh-crumb-current {
-	color: var(--sl-color-gray-2);
-	font-weight: 500;
-}
-
-.zh-breadcrumbs .zh-crumb-sep {
-	color: var(--sl-color-gray-4);
-	user-select: none;
-}
-
-/* 文章页 H1 精修：品牌蓝渐变文字 + 底部 hairline 分隔线
+/* 文章页 H1 精修：品牌蓝渐变文字
    （仅非 hero 页面；首页 hero 标题已居中 + 逐字动画，不受影响。
-    fallback：不支持 background-clip:text 时退化为纯品牌色文字） */
+    fallback：不支持 background-clip:text 时退化为纯品牌色文字。
+    底部 hairline 分隔线已移除——用户反馈标题与描述之间的分割线多余） */
 html:not([data-has-hero]) [data-page-title] {
 	background: linear-gradient(120deg, var(--zh-brand), hsl(217, 88%, 68%));
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: var(--zh-brand-strong); /* fallback 底色，clip 生效时被透明覆盖 */
 	-webkit-text-fill-color: transparent; /* Safari 渐变文字 */
-	padding-bottom: 0.75rem;
-	border-bottom: 1px solid
-		color-mix(in srgb, var(--sl-color-accent) 25%, transparent);
 }
 
 .zh-page-desc {

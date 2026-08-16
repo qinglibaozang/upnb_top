@@ -10,19 +10,29 @@
 - 文章页 H1 品牌蓝渐变文字 + 底部 hairline 分隔线（仅文章页，首页 hero 不受影响）
 - 全站焦点环统一：`:focus-visible` 品牌蓝 2px 轮廓（仅键盘导航触发；排除首页搜索框避免双重描边）
 - 顶栏搜索框拉长至固定 400px（覆盖 starlight 自身 `max-width: 22rem` 封顶），首页（PC）时水平垂直居中于顶栏
+- 侧边栏 VS Code 文件树化：文件夹/文件行内 SVG 图标（data URI，零网络请求）、隐藏折叠箭头、子级实线引导线（16px 对齐链：margin 1rem 线=图标中心 + 5px padding 补边框位）、选中项浅蓝底圆角块
+- 侧边栏分组标题去数字序号：一级分组在 `astro.config.mjs` 服务端 `folderLabel()` 剥离，autogenerate 嵌套子文件夹由 `zh-optimize.ts` 新增 `stripSidebarNumberPrefixes()` 客户端剥离（astro:page-load，VT 兼容）
+- 侧边栏自动生成：移除 starlight-sidebar-topics 插件，改 `autoSidebar()` 扫描 `src/content/docs` 一级文件夹自动生成分组
+- 文章页描述元信息：10 篇文档 frontmatter 补充 `description` 字段（标题下方展示）
+- TOC 按 vitepress.dev 官网复刻：左 1px 分隔线 + 1rem 内边距；当前项品牌蓝文字 + 2px 品牌蓝 mark 线（`li:has(>a[aria-current=true])::before`，按 `--depth` 变量回退对齐左分隔线，垂直居中当前行）
 
 ### 变更
 - 移除首页 hero 下方大搜索框（含 `.zh-home-search` 整套样式），搜索入口统一为顶栏搜索框
-- 侧边栏文章链接去加粗：选中/未选中均常规字重 400（`--zh-fw-sidebar-active` var 间接引用，防 minifier 把 400 当冗余删除），区分靠浅蓝底 + 左侧品牌蓝色条；选中色条由 `inset box-shadow`（被圆角裁成弧形）改为 `::before` 伪元素直角色条
-- 字体体系统一 16px：正文（`--zh-text-body` var 间接引用防 minifier 删除）/ 侧边栏 / TOC 标题与条目全部 16px；侧边栏行高回归紧凑（1.4，删除强制 min-height）
-- 面包屑导航关闭（`display: none`，组件与逻辑保留可恢复）
+- 字体体系统一 16px：正文 / 左栏链接与分组标题 / 右栏 TOC 标题与条目全部 16px；左右边栏行高统一 2（此前侧边栏 1.4、TOC 2.28571）
+- 侧边栏选中态：常规字重 400（`--zh-fw-sidebar-active` var 间接引用，防 minifier 把 400 当冗余删除）+ 浅蓝底圆角块，不再使用左侧色条（原 ::before 色条规则移除）
+- 面包屑导航彻底移除（组件代码与样式删除，不可恢复；此前为 display:none 保留）
+- 首页 hero 下方「站点导航」标题删除
 - 顶栏搜索容器改用自定义类 `zh-header-search`（Tailwind `md:max-w-*` 类未被 v4 扫描生成，改纯 CSS 确定控制）
+- TOC 链接清除 starlight 原生 `--depth` 左内边距（`calc(1rem*var(--depth)+.5rem)`），「本页目录」标题与链接左对齐
 
 ### 修复
 - 侧边栏「怎么还是粗体」：根因① starlight 默认 `.large`（顶层链接）`font-weight: 600`；根因② CSS minifier 把等于初始值的 `font-weight: 400`（含 `!important`）当冗余删除，删后回落 starlight 600——改用 `var(--zh-fw-sidebar-active)` 间接引用后稳定生效
-- 侧边栏字号/行高「改太小、行距变大」：`.entry-link` 类从未命中真实 DOM（链接实际只有 `large` 类），修正选择器为 `.sidebar-content a.large`，字号恢复 16px、去掉强制 min-height
+- 侧边栏字号/行高「改太小、行距变大」：`.entry-link` 类从未命中真实 DOM（链接实际只有 `large` 类），修正选择器为 `.sidebar-content a.large`
 - hero 按钮高度不一：两个按钮图标分别来自 LinkButtonIcon（`block size-5`）与 starlight Icon（内联 svg 基线空隙），统一 `svg { display:block; 1rem }` 后胶囊等高
 - hero 内容不居中：nova 桌面端左对齐（`text-align:start`/`flex-start`），补 stack/copy/actions 三条居中覆盖
+- TOC mark 线不显示：链接 `a` 有 `overflow:hidden`（ellipsis 必需）裁剪 `::before`，mark 线改挂到 `li` 上
+- TOC 嵌套出现两层 mark 线：`:has(a)` 为后代匹配，h2 的 li 因内部 h3 的 a 是当前项而误匹配 → 改 `:has(>a)` 直接子级匹配
+- 学科UP主 页面 title 重复 5 次（历史误编辑）→ 修正为「学科UP主」，并删除残留测试内容「123321」
 
 ## 2026-08-15
 ### 新增

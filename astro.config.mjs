@@ -3,77 +3,32 @@ import { defineConfig } from 'astro/config';
 import fs from 'node:fs';
 import path from 'node:path';
 import starlight from '@astrojs/starlight';
-import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightThemeNova from 'starlight-theme-nova';
 
 // ============================================================
-// 自动生成 sidebar-topics：扫描 src/content/docs/ 下的文件夹，
-// 每个文件夹自动成为一个分类（新增文件夹零配置，无需改这里）
+// 侧边栏：扫描 src/content/docs/ 一级文件夹自动生成分组
+// （原始文档目录模式；label 渲染时去掉数字序号前缀，如 00.入站必读 → 入站必读）
 // ============================================================
 
-// 分类图标池（按文件夹排序循环分配，可自行增删）
-const TOPIC_ICONS = [
-	'rocket',
-	'open-book',
-	'star',
-	'book',
-	'document',
-	'setting',
-	'pencil',
-	'link',
-	'cloud-download',
-	'mobile-android',
-	'list-format',
-	'code-branch',
-];
-
-/** 文件名 → URL slug（与 Astro 规则一致：去扩展名、去点、转小写） */
-function fileSlug(name) {
-	return name.replace(/\.(md|mdx)$/i, '').replace(/\./g, '').toLowerCase();
-}
-
-/** 文件夹名 → 文件夹 slug */
-function folderSlug(name) {
-	return name.replace(/\./g, '').toLowerCase();
-}
-
-/** 文件夹名 → 显示名（去掉数字序号前缀，如 01.K12学习资源 → K12学习资源） */
+/** 文件夹名 → 显示名（去掉数字序号前缀，如 00.入站必读 → 入站必读） */
 function folderLabel(name) {
 	return name.replace(/^\d+[.\s-]*/, '');
 }
 
-/** 扫描目录自动生成 topics 配置 */
-function autoTopics() {
+/** 扫描一级文件夹生成 sidebar 分组（autogenerate 递归包含子目录） */
+function autoSidebar() {
 	const dir = path.join(process.cwd(), 'src/content/docs');
 	if (!fs.existsSync(dir)) return [];
 
-	const folders = fs
+	return fs
 		.readdirSync(dir, { withFileTypes: true })
 		.filter((d) => d.isDirectory() && !d.name.startsWith('.'))
-		.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
-	return folders
-		.map((folder, i) => {
-			const files = fs
-				.readdirSync(path.join(dir, folder.name))
-				.filter((f) => /\.(md|mdx)$/i.test(f))
-				.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-			// 空文件夹不生成分类（避免无效链接）
-			if (files.length === 0) return null;
-
-			const first = files[0];
-			return {
-				label: folderLabel(folder.name),
-				icon: TOPIC_ICONS[i % TOPIC_ICONS.length],
-				link: `/${folderSlug(folder.name)}/${fileSlug(first)}/`,
-				items: [{ autogenerate: { directory: folder.name } }],
-			};
-		})
-		.filter(Boolean);
+		.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+		.map((d) => ({
+			label: folderLabel(d.name),
+			items: [{ autogenerate: { directory: d.name } }],
+		}));
 }
-
-// ============================================================
 
 // https://astro.build/config
 export default defineConfig({
@@ -106,9 +61,6 @@ export default defineConfig({
 			// 从 git 提交历史生成每页「最后更新时间」（文章页头部元信息，PageTitle 组件展示）
 			lastUpdated: true,
 			plugins: [
-				// 侧边栏顶部分类切换（自动生成，新增文件夹零配置）
-				// exclude 兑底：未归入任何分类的页面不报错，走默认侧边栏
-				starlightSidebarTopics(autoTopics(), { exclude: ['**'] }),
 				// Starlight Nova 主题
 				starlightThemeNova({
 					nav: [
@@ -118,6 +70,8 @@ export default defineConfig({
 				}),
 			],
 			title: '情礼宝藏',
+			// 侧边栏：全站目录树（label 已去数字前缀）
+			sidebar: autoSidebar(),
 			// 自定义组件覆盖：移动端导航布局（菜单左/标题居中/搜索+明暗右）
 			components: {
 				Header: './src/components/Header.astro',
