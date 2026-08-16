@@ -574,6 +574,18 @@ header {
 	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
 
+/* body 滚动锁定：移动端侧边栏抽屉展开时锁住页面滚动，滚轮/触摸只滚抽屉内部。
+   starlight 原版在 MobileMenuToggle 的 is:global 样式里提供（@layer starlight.core），
+   但 nova 主题覆盖了该组件且未带锁定——此处补齐（unlayered 赢 @layer） */
+body[data-mobile-menu-expanded] {
+	overflow: hidden;
+}
+@media (min-width: 50rem) {
+	body[data-mobile-menu-expanded] {
+		overflow: auto; /* 与 starlight 原版一致：桌面端不锁 */
+	}
+}
+
 /* 固定底栏（Footer.astro .zh-footer-bar，吸在视口底部）预留空间：
    正文/首页底部 padding 加大，避免文章末尾与分页导航被底栏遮挡 */
 main {
@@ -636,9 +648,14 @@ main {
 #starlight__sidebar {
 	border-color: transparent;
 	box-shadow: none;
-	/* 左栏层叠必须压到 0：左栏 fixed 延伸到视口底部（top:顶栏/bottom:0），
-	   实测其层叠高于常规 z-index（曾盖住底栏），必须低于固定底栏（z-index 极限） */
-	z-index: 0 !important;
+	/* 左栏层叠：必须高于正文流与移动端 TOC 抽屉，且低于固定底栏。
+	   - 曾用 z-index:0（防盖底栏）→ 0 与正文流 auto 同层，DOM 靠后的 <main>
+	     盖住左栏：移动端抽屉（max-md:w-full）展开时透出正文（"侧边栏透明"）；
+	   - 提到 1 → 高于正文流，但移动端 TOC 抽屉 z-index:var(--sl-z-index-toc)=4
+	     仍盖住侧边栏（fixed 顶条 + 不透明背景）；
+	   - 现取 calc(var(--sl-z-index-toc) + 1)=5：高于 TOC 抽屉与正文流，
+	     且远低于固定底栏（z-index:2147483647），三者层叠关系才正确 */
+	z-index: calc(var(--sl-z-index-toc) + 1) !important;
 }
 
 .right-sidebar {
