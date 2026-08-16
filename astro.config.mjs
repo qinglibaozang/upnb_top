@@ -103,6 +103,8 @@ export default defineConfig({
 					lang: 'zh-CN',
 				},
 			},
+			// 从 git 提交历史生成每页「最后更新时间」（文章页头部元信息，PageTitle 组件展示）
+			lastUpdated: true,
 			plugins: [
 				// 侧边栏顶部分类切换（自动生成，新增文件夹零配置）
 				// exclude 兑底：未归入任何分类的页面不报错，走默认侧边栏
@@ -127,6 +129,8 @@ export default defineConfig({
 				Search: './src/components/Search.astro',
 				// 覆盖 Footer：追加版权信息 + ICP 备案号
 				Footer: './src/components/Footer.astro',
+				// 覆盖 PageTitle：面包屑 + 描述 + 更新时间（文章页头部门户化）
+				PageTitle: './src/components/PageTitle.astro',
 			},
 			// 站点 logo（顶部导航站点名前）
 			logo: {

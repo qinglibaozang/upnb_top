@@ -3,9 +3,8 @@ title: 首页
 description: 优质学习资源汇总导航
 template: splash # 首页落地页布局（无侧边栏），文章入口请看下方按钮或各文档页左侧边栏
 hero:
+  title: 情礼宝藏
   tagline: 优质学习资源汇总导航
-  image:
-    file: ../../assets/houston.webp
   actions:
     - text: 入站必读
       link: /00入站必读/01使用指南/
@@ -21,18 +20,23 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 ## 站点导航
 
-<CardGrid stagger>
+{/* 横排大卡片：参考 DeepSeek Harness 官网「Cordis 内核 / 插件提供能力 / 配置层自由组合」卡片
+    （并列横排 + 居中布局 + 大图标 + 英文 mono 标签，样式见 zh.css 卡片章节） */}
+<CardGrid>
 	<Card title="入站必读" icon="rocket">
+		<span class="zh-card-tag">START HERE</span>
 		新手使用指南与上网技巧，建议先看这里。
 
 		[开始阅读 →](/00入站必读/01使用指南/)
 	</Card>
 	<Card title="学习资源" icon="open-book">
+		<span class="zh-card-tag">RESOURCES</span>
 		学习网站、学习 APP、K12 资源与优质网课汇总。
 
 		[查看资源 →](/01学习资源/01学习网站/)
 	</Card>
 	<Card title="UP主推荐" icon="star">
+		<span class="zh-card-tag">CREATORS</span>
 		各学科宝藏 UP 主推荐清单。
 
 		[查看推荐 →](/02up主推荐/01学科up主/)

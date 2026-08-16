@@ -421,6 +421,27 @@ function removeTocOverview() {
 		.forEach((a) => a.closest('li')?.remove());
 }
 
+/** hero 标题逐字化：把「情礼宝藏」拆成 span.zh-char（配合 zh.css 逐字弹跳入场动画）
+    在指定文档上执行：
+    - 首次加载：模块顶层对当前 document 执行（模块脚本 defer，运行于 DOM 解析后、
+      首帧绘制前），保证标题以拆字状态进入首帧，避免「完整标题一闪再拆字重演」的闪烁；
+    - VT 导航：在 astro:before-swap 中对 newDocument 执行（换页前拆好），
+      保证每次切回首页动画都会播放，同样无闪烁；
+    只拆首页 hero（html[data-has-hero]），其余页面零开销 */
+function splitHeroTitleIn(doc: Document) {
+	const h1 = doc.querySelector<HTMLHeadingElement>('html[data-has-hero] .hero h1');
+	if (!h1 || h1.querySelector('.zh-char')) return;
+	const text = h1.textContent ?? '';
+	if (!text) return;
+	h1.textContent = '';
+	for (const ch of text) {
+		const span = doc.createElement('span');
+		span.className = 'zh-char';
+		span.textContent = ch;
+		h1.appendChild(span);
+	}
+}
+
 /** 回到顶部按钮：圆形进度环 + 阅读百分比，点击平滑回顶 */
 function initBackTop() {
 	const btn = document.createElement('button');
@@ -467,6 +488,14 @@ function initBackTop() {
 }
 
 if (typeof document !== 'undefined') {
+	// 首次加载：拆字在首帧前完成（见 splitHeroTitleIn 注释），不依赖事件
+	splitHeroTitleIn(document);
+	// VT 导航：换页前对新文档拆字（astro:before-swap 的 newDocument 为新页面文档），
+	// 保证每次切回首页都播放逐字动画；非首页文档无 data-has-hero，直接跳过
+	document.addEventListener('astro:before-swap', (e) => {
+		const newDoc = e.newDocument;
+		if (newDoc && typeof newDoc.querySelector === 'function') splitHeroTitleIn(newDoc);
+	});
 	// 用 astro:page-load 而非 DOMContentLoaded：
 	// 启用 View Transitions 后，切页不会重新执行本脚本，但 astro:page-load 在
 	// 首次加载和每次导航后都会触发，确保菜单/回到顶部/排版在切页后依然生效。

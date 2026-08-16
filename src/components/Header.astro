@@ -55,7 +55,7 @@ const getText = (v) => (typeof v === 'string' ? v : v?.[route.currentLocale ?? '
 
   <!-- 右侧：搜索 + 明暗切换（移动端显示），桌面加宽搜索框 -->
   <div class="zh-nav-right flex items-center gap-2 print:hidden">
-    <div class="flex md:max-w-60 md:flex-1">
+    <div class="zh-header-search">
       <Search />
     </div>
     <ThemeSelect />

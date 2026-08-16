@@ -7,14 +7,14 @@
 
    阅读层级（内容区）：
      H1 30px · H2 24px · H3 20px · H4 16px
-     正文 15px / 行高 1.7（100%）
-     代码 13px · 表格 13px（87%）
+     正文 16px / 行高 1.7（100%，用户调整，原 15px）
+     代码 13px · 表格 13px（81%）
 
    导航层级（浏览区，配套递减）：
-     顶栏     14px（93%）
-     侧边栏   14px（93%）← 与正文同族，浏览时视觉不跳
-     分组标题 12px（80%）
-     TOC      13px（87%）← 与代码/表格同级，辅助定位
+     顶栏     14px（88%）
+     侧边栏   16px（100%，用户调整）
+     分组标题 12px（75%）
+     TOC      16px（100%，用户调整）
 
    辅助层级：
      说明文字 12px（80%）
@@ -31,6 +31,11 @@
 	--sl-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 		'Liberation Mono', 'Courier New', monospace;
 
+	/* 侧边栏选中项字重：不加粗（值经 var() 间接引用，防 minifier 删除，见选中态规则注释） */
+	--zh-fw-sidebar-active: 400;
+	/* 正文字号 16px（值经 var() 间接引用，防 minifier 删除，见正文区规则注释） */
+	--zh-text-body: 1rem;
+
 	/* 行高基调：中文比英文需要更宽松 */
 	--sl-line-height: 1.7;
 	--sl-line-height-headings: 1.3;
@@ -46,6 +51,10 @@
 
 /* ── 3. 正文区（阅读层级） ────────────────────────────────── */
 .sl-markdown-content {
+	/* 16px（用户调整，原 15px）。
+	   必须 var() 间接：直接写 font-size:1rem（=浏览器默认 medium）会被
+	   CSS minifier 当冗余删除，删掉后回落为 starlight 默认 15px */
+	font-size: var(--zh-text-body);
 	letter-spacing: 0.01em; /* 中英文混排微字距 */
 
 	/* ── 中文排版核心特性（CSS 原生，现代浏览器渐进增强） ── */
@@ -124,31 +133,136 @@
 	border-radius: 0 0.5rem 0.5rem 0;
 }
 
-/* ── 4. 左栏侧边栏（导航层级） ──────────────────────────────
-   链接 14px：与正文 15px 配套（93%），大厂主流档位
-   分组标题保持 12px，拉开层级差 */
-.sidebar-content .entry-link {
-	font-size: 0.875rem; /* 14px */
-	line-height: 1.5;
-	height: auto;
-	min-height: 2rem;
-	border-radius: 0.5rem; /* 胶囊圆角 */
+/* ── 提示框 aside：配色统一 ────────────────────────────────
+   starlight 用 CSS 变量控制四色，这里覆盖为品牌语义色（note 品牌蓝、
+   tip 青、caution 琥珀、danger 红，均低饱和）并统一圆角 + 淡底 */
+.sl-markdown-content .starlight-aside {
+	border-radius: 0 0.75rem 0.75rem 0;
 }
 
-/* 文章标题选中：正蓝实底 + 白字（与 topic 图标选中同色系） */
+.sl-markdown-content .starlight-aside--note {
+	--sl-color-asides-text-accent: var(--sl-color-accent-high);
+	--sl-color-asides-border: var(--sl-color-accent);
+	background-color: var(--sl-color-accent-low);
+}
+
+.sl-markdown-content .starlight-aside--tip {
+	--sl-color-asides-text-accent: var(--zh-tip-accent);
+	--sl-color-asides-border: var(--zh-tip);
+	background-color: color-mix(in srgb, var(--zh-tip) 10%, transparent);
+}
+
+.sl-markdown-content .starlight-aside--caution {
+	--sl-color-asides-text-accent: var(--zh-caution-accent);
+	--sl-color-asides-border: var(--zh-caution);
+	background-color: color-mix(in srgb, var(--zh-caution) 10%, transparent);
+}
+
+.sl-markdown-content .starlight-aside--danger {
+	--sl-color-asides-text-accent: var(--zh-danger-accent);
+	--sl-color-asides-border: var(--zh-danger);
+	background-color: color-mix(in srgb, var(--zh-danger) 10%, transparent);
+}
+
+/* ── 4. 左栏侧边栏（导航层级） ──────────────────────────────
+   链接 14px：与正文 15px 配套（93%），大厂主流档位
+   分组标题保持 12px，拉开层级差
+   数字等宽（tabular-nums）：条目/分组名含数字时宽度统一，列表更整齐 */
+.sidebar-content {
+	font-variant-numeric: tabular-nums;
+}
+
+.sidebar-content a.large {
+	font-size: 1rem; /* 16px：恢复 starlight .large 原字号（只去粗，不缩小） */
+	/* 顶层链接带 starlight 的 .large 类（font-weight:600 大号粗体设计），
+	   这里用与选中态同款的 var() 间接写法覆盖为 400（直接写 400 会被 minifier 删除） */
+	font-weight: var(--zh-fw-sidebar-active);
+	line-height: 1.4; /* starlight 原紧凑行高 */
+	height: auto;
+	border-radius: 0.5rem; /* 胶囊圆角 */
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+/* 链接悬停：柔和浅底（中性灰 18% 透明度，亮/暗主题自适应），导航反馈更清晰 */
+.sidebar-content a.large:hover {
+	background-color: color-mix(in srgb, var(--sl-color-gray-5) 18%, transparent);
+}
+
+/* 文章标题选中：浅蓝底 + 品牌蓝字 + 左侧色条（不加粗——区分靠颜色与色条，
+   加粗只留给文件夹分组标题。
+   注意：font-weight 必须用 var() 间接写法（--zh-fw-sidebar-active: 400），
+   直接写 font-weight:400（=初始值）会被 CSS minifier 当冗余删除，删掉后
+   回落为 starlight 默认 @layer starlight.core 的 [aria-current='page'] 600；
+   var() 无法被 minifier 推断，可稳定保留 */
 .sidebar-content a[aria-current='page'],
 .sidebar-content a[aria-current='page']:hover,
 .sidebar-content a[aria-current='page']:focus {
+	position: relative;
+	font-weight: var(--zh-fw-sidebar-active);
+	color: var(--zh-article-active-text);
+	background-color: var(--zh-article-active-bg);
+}
+
+/* 左侧强调色条：直角——用伪元素画（伪元素不受 border-radius 裁剪），
+   inset box-shadow 会被链接圆角裁成弧形（"倒角"），故弃用 */
+.sidebar-content a[aria-current='page']::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	border-radius: 0;
+	background: var(--zh-article-active-text);
+}
+
+/* 侧边栏分组标题：小标签化（12px 灰色加粗 + 字距），与正文层级拉开 */
+.sidebar-content summary .group-label .large {
+	font-size: 0.75rem; /* 12px */
 	font-weight: 600;
-	color: #fff;
-	background-color: var(--zh-article-active-text);
+	letter-spacing: 0.08em;
+	color: var(--sl-color-gray-3);
+	text-transform: uppercase; /* 中文无影响；英文分组名呈小标签风格 */
 }
 
 /* ── 5. 右栏目录 TOC（定位层级） ────────────────────────────
-   12.8px → 13px：与代码/表格同层级，定位信息不抢正文 */
+   16px：与侧边栏同字号（用户调整）；行高/微字距与左栏对称；数字等宽与侧边栏一致 */
+starlight-toc {
+	font-variant-numeric: tabular-nums;
+}
+
 starlight-toc a {
-	font-size: 0.8125rem; /* 13px */
-	line-height: 1.5;
+	font-size: 1rem; /* 16px */
+	line-height: 1.45;
+	letter-spacing: 0.005em;
+}
+
+/* 移动端 TOC 抽屉：同 16px，与右栏一致 */
+mobile-starlight-toc a {
+	font-size: 1rem;
+}
+
+/* TOC 当前项：浅蓝底 + 品牌蓝字（starlight 用 aria-current=true 标记滚动定位中的标题） */
+starlight-toc a[aria-current='true'] {
+	color: var(--zh-article-active-text);
+	background-color: var(--zh-article-active-bg);
+	font-weight: 600;
+	border-radius: 0.375rem;
+}
+
+/* TOC 标题「本页目录」：16px，与目录项同字号（用户调整）；字重 600 + 字距保持小标签质感 */
+starlight-toc h2 {
+	font-size: 1rem; /* 16px */
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--sl-color-gray-3);
+}
+
+/* 移动端 TOC 抽屉标题：同步 16px */
+mobile-starlight-toc h2 {
+	font-size: 1rem;
 }
 
 /* ── 6. 辅助细节 ──────────────────────────────────────────── */
@@ -197,6 +311,28 @@ starlight-toc a {
 	margin-left: auto;
 }
 
+/* 顶栏搜索框拉长：桌面固定 400px（用户指定）。
+   布局真相：桌面 <nav class="flex-1"> 已吃掉 header 全部剩余空间，
+   zh-nav-right 是内容宽度 → 容器 flex:1 无空间可撑，max-width 只是永远
+   达不到的上限，必须给按钮固定 width（同时覆盖 starlight 的 width:100%
+   与 max-width:22rem=352px 双层封顶） */
+@media (min-width: 50rem) {
+	.zh-header-search button[data-open-modal] {
+		width: 400px;
+		max-width: 400px;
+	}
+
+	/* 首页（splash，html[data-has-hero]）PC 端：搜索框水平垂直居中于顶栏。
+	   脱离文档流后工具区恢复为 主题+社交+语言，搜索框精确居中；
+	   仅首页生效，文档页顶栏搜索仍在右侧 */
+	html[data-has-hero] .zh-header-search {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+}
+
 @media (min-width: 48rem) {
 	.zh-nav-title {
 		position: static;
@@ -242,48 +378,91 @@ starlight-toc a {
    所有线统一用 gray-4：明主题白底上是深灰（黑线），暗主题黑底上是浅灰（白线），
    且在 nova 的黑色侧边栏背景上始终可见——全站线条完全一致 */
 :root {
+	/* ============ 品牌主色：商务蓝（全站唯一 accent） ============
+	   参考：华为云 / 腾讯云 / 阿里云文档站的单一强调色体系。
+	   所有选中态、链接、按钮、进度环、代码高亮统一走这一个色系，
+	   不再出现红蓝混用的"双 accent"（改版前分类选中为红、文章选中为蓝）。 */
+	--zh-brand: hsl(217, 88%, 55%); /* 品牌蓝（中明度，亮暗通用） */
+	--zh-brand-strong: hsl(217, 85%, 40%); /* 深蓝（亮色模式文字用） */
+	--zh-brand-soft: hsl(217, 60%, 94%); /* 浅蓝底（卡片/选中底） */
+	--zh-brand-glow: hsla(217, 88%, 55%, 0.14); /* 蓝色辉光（hover/软底色） */
+
+	/* Starlight accent 三件套统一为品牌蓝（此处为暗色默认值） */
+	--sl-color-accent: hsl(217, 88%, 62%);
+	--sl-color-accent-high: hsl(217, 90%, 85%);
+	--sl-color-accent-low: hsl(217, 50%, 24%);
+
 	--zh-line: var(--sl-color-gray-4); /* 全站统一线色 */
 	/* 正文内容宽度：随视口自适应（大屏更宽，中小屏保持舒适） */
 	--sl-content-width: clamp(50rem, 58vw, 72rem);
-	--zh-topic-active-bg: #ef4444; /* 分类选中：鲜红（柔和不刺眼） */
+	--zh-topic-active-bg: hsl(217, 88%, 55%); /* 分类选中：品牌蓝 */
 	--zh-topic-active-text: #fff;
-	--zh-article-active-text: #3b82f6; /* 文章选中：正蓝（暗色模式） */
-	--zh-article-active-bg: rgba(59, 130, 246, 0.16);
+	--zh-article-active-text: hsl(217, 90%, 70%); /* 文章选中文字：亮蓝（暗色） */
+	--zh-article-active-bg: hsla(217, 88%, 60%, 0.16);
 	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
 	--zh-shadow-md: rgba(255, 255, 255, 0.12);
 	--zh-shadow-lg: rgba(255, 255, 255, 0.16);
-	--zh-accent-soft: rgba(120, 150, 255, 0.13);
+	--zh-accent-soft: hsla(217, 88%, 60%, 0.13);
 }
 
 :root[data-theme='light'] {
+	/* 亮色模式：accent 三件套换为可读性更稳的深蓝/浅蓝 */
+	--sl-color-accent: hsl(217, 88%, 52%);
+	--sl-color-accent-high: hsl(217, 80%, 38%);
+	--sl-color-accent-low: hsl(217, 88%, 93%);
+
 	--zh-line: var(--sl-color-gray-4);
-	--zh-topic-active-bg: #ef4444;
+	--zh-topic-active-bg: hsl(217, 88%, 52%);
 	--zh-topic-active-text: #fff;
-	--zh-article-active-text: #1d4ed8; /* 文章选中：正深蓝（明色模式） */
-	--zh-article-active-bg: rgba(29, 78, 216, 0.1);
+	--zh-article-active-text: hsl(217, 85%, 42%); /* 文章选中：品牌深蓝（明色模式） */
+	--zh-article-active-bg: hsla(217, 88%, 52%, 0.1);
 	--zh-shadow-sm: rgba(15, 20, 34, 0.15);
 	--zh-shadow-md: rgba(15, 20, 34, 0.25);
 	--zh-shadow-lg: rgba(15, 20, 34, 0.3);
-	--zh-accent-soft: rgba(56, 92, 246, 0.1);
+	--zh-accent-soft: hsla(217, 88%, 52%, 0.1);
+
+	/* 提示框（aside）语义色：亮色主题低饱和版（商务克制） */
+	--zh-tip: hsl(160, 60%, 38%);
+	--zh-tip-accent: hsl(160, 45%, 24%);
+	--zh-caution: hsl(38, 80%, 40%);
+	--zh-caution-accent: hsl(38, 65%, 26%);
+	--zh-danger: hsl(0, 70%, 44%);
+	--zh-danger-accent: hsl(0, 60%, 28%);
 }
 
 :root[data-theme='dark'] {
+	--sl-color-accent: hsl(217, 88%, 62%);
+	--sl-color-accent-high: hsl(217, 90%, 85%);
+	--sl-color-accent-low: hsl(217, 50%, 24%);
+
 	--zh-line: var(--sl-color-gray-4);
-	--zh-topic-active-bg: #ef4444;
+	--zh-topic-active-bg: hsl(217, 88%, 60%);
 	--zh-topic-active-text: #fff;
-	--zh-article-active-text: #3b82f6;
-	--zh-article-active-bg: rgba(59, 130, 246, 0.16);
+	--zh-article-active-text: hsl(217, 90%, 70%);
+	--zh-article-active-bg: hsla(217, 88%, 60%, 0.16);
 	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
 	--zh-shadow-md: rgba(255, 255, 255, 0.12);
 	--zh-shadow-lg: rgba(255, 255, 255, 0.16);
-	--zh-accent-soft: rgba(120, 150, 255, 0.13);
+	--zh-accent-soft: hsla(217, 88%, 60%, 0.13);
+
+	/* 提示框（aside）语义色：暗色主题低饱和版 */
+	--zh-tip: hsl(160, 55%, 55%);
+	--zh-tip-accent: hsl(160, 55%, 80%);
+	--zh-caution: hsl(38, 75%, 55%);
+	--zh-caution-accent: hsl(38, 75%, 82%);
+	--zh-danger: hsl(0, 65%, 60%);
+	--zh-danger-accent: hsl(0, 65%, 82%);
 }
 
-/* 顶部导航栏底边：统一线色 + 柔和投影 */
+/* 顶部导航栏：半透明毛玻璃吸顶（nova 默认 backdrop-blur 8px，这里增强模糊+提饱和；
+   背景 78% 不透明，滚动时正文隐约透出，大厂吸顶导航标配） */
 header {
 	width: 100vw; /* 固定为视口宽：防止页面滚动条出现时 header 变窄导致右侧工具区位移 */
 	border-color: var(--zh-line);
 	box-shadow: 0 2px 8px var(--zh-shadow-md);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 78%, transparent);
+	backdrop-filter: blur(16px) saturate(1.5);
+	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
 
 /* 左侧边栏右边框：统一线色 + 向右投影 */
@@ -313,11 +492,117 @@ header {
 	}
 }
 
-/* 卡片：柔和浮起 */
-.sl-markdown-content .card {
+/* 卡片：统一品牌蓝（覆盖 starlight 默认按 nth-child 轮换的橙/绿/红/蓝多彩），
+   柔和浮起 + hover 上浮，参考大厂文档站卡片 */
+.sl-markdown-content .card,
+.sl-markdown-content .card:nth-child(4n + 1),
+.sl-markdown-content .card:nth-child(4n + 3),
+.sl-markdown-content .card:nth-child(4n + 4),
+.sl-markdown-content .card:nth-child(4n + 5) {
+	--sl-card-border: var(--sl-color-accent);
+	--sl-card-bg: var(--sl-color-accent-low);
+	border-radius: 0.75rem;
 	box-shadow:
 		0 1px 2px var(--zh-shadow-sm),
 		0 4px 12px var(--zh-shadow-sm);
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.sl-markdown-content .card:hover {
+	transform: translateY(-4px);
+	border-color: var(--sl-color-accent);
+	box-shadow:
+		0 2px 4px var(--zh-shadow-sm),
+		0 12px 28px var(--zh-shadow-md);
+}
+
+/* 卡片图标：圆角加大，统一蓝色底 */
+.sl-markdown-content .card .icon {
+	border-radius: 0.5rem;
+	border-color: var(--sl-card-border);
+	background-color: var(--sl-card-bg);
+}
+
+/* ── 首页卡片：复刻 DeepSeek Harness 官网「Cordis 内核」横排大卡片 ──
+   特征：三列横排、内容居中、大图标 + 标题 + 英文 mono 标签 + 描述、
+   hover 时 1px 渐变描边发光（mask 技巧，仿官网 absolute inset:0 发光层） */
+html[data-has-hero] .sl-markdown-content .card {
+	position: relative; /* ::before 渐变层定位基准 */
+	align-items: center;
+	text-align: center;
+	padding: 2.75rem 1.75rem;
+	border-radius: 1rem;
+	overflow: hidden; /* 渐变层不溢出圆角 */
+}
+
+/* 标题区：图标在上、标题在下（官网纵向布局），整体居中 */
+html[data-has-hero] .sl-markdown-content .card .title {
+	flex-direction: column;
+	gap: 1.1rem;
+	align-items: center;
+}
+
+/* 大图标：放大到 52px 底 + 品牌浅蓝圆角底 */
+html[data-has-hero] .sl-markdown-content .card .icon {
+	width: 3.25rem;
+	height: 3.25rem;
+	padding: 0.75rem;
+	box-sizing: border-box;
+	border-radius: 0.85rem;
+	border-color: var(--sl-card-border);
+	background-color: var(--sl-card-bg);
+}
+
+/* hover 渐变描边层：mask 只保留 1px 渐变边（135° 品牌蓝高光），
+   mask-composite 不支持时退化为仅边框变色（渐进增强） */
+html[data-has-hero] .sl-markdown-content .card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	padding: 1px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	background: linear-gradient(
+		135deg,
+		hsla(217, 88%, 60%, 0.55) 0%,
+		transparent 40%,
+		transparent 60%,
+		hsla(217, 88%, 60%, 0.35) 100%
+	);
+	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor;
+	mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	mask-composite: exclude;
+}
+
+html[data-has-hero] .sl-markdown-content .card:hover::before {
+	opacity: 1;
+}
+
+/* 英文 mono 标签（写在卡片正文开头的 span.zh-card-tag）：
+   官网 CORDIS KERNEL 同款——等宽字体、小号、宽字距、大写 */
+.zh-card-tag {
+	display: block;
+	margin-bottom: 0.75rem;
+	font-family: var(--sl-font-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--sl-color-accent);
+}
+
+/* 首页卡片网格：横排并列（去掉 CardGrid 的 stagger 错落下移），
+   桌面自适应列数——每行最多 4 个（minmax 17rem），卡片少时一行排满等宽；
+   移动端保持 CardGrid 默认单列 */
+@media (min-width: 50rem) {
+	html[data-has-hero] .card-grid {
+		grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+	}
 }
 
 /* 代码块：微投影 */
@@ -421,7 +706,278 @@ mobile-starlight-toc li:has(a[href='#_top']) {
 	background: var(--zh-accent-soft);
 }
 
+/* ── 焦点环统一 ──────────────────────────────────────────────
+   全站键盘导航（Tab）可见的品牌蓝轮廓，与商务蓝体系一致；
+   :focus-visible 仅键盘触发，鼠标点击不出现轮廓。
+   排除首页搜索框按钮：它已有自定义聚焦光晕（渐变描边 + 蓝晕），
+   再加 outline 会双重描边 */
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible:not(site-search button) {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: 2px;
+	border-radius: 0.25rem;
+}
+
 * {
 	scrollbar-width: thin;
 	scrollbar-color: rgba(127, 127, 127, 0.5) transparent;
+}
+
+/* ── 10. 首页落地页（splash）门户化 ─────────────────────────
+   参考大厂文档站首页：品牌渐变 hero + 大搜索框 + 卡片入口
+   首页由 html[data-has-hero] 标记（splash 模板），其余页面不受影响 */
+html[data-has-hero] .main-frame {
+	/* 顶部品牌蓝光晕渐变：向屏幕上方扩散、向下淡出，商务门户感 */
+	background:
+		radial-gradient(ellipse 90% 55% at 50% -12%, var(--zh-accent-soft), transparent 70%),
+		linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--sl-color-accent-low) 55%, transparent),
+			transparent 38%
+		);
+}
+
+/* hero：单列居中（已移除吉祥物图），加大垂直留白 */
+html[data-has-hero] .hero {
+	grid-template-columns: 1fr;
+	justify-items: center;
+	padding-block:
+		clamp(3rem, 7vw, 5.5rem)
+		clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* 内容自身居中：nova 在桌面端（≥50rem）为"左文右图"布局把内容设为左对齐
+   （text-align:start / align-items:flex-start / justify-content:flex-start），
+   移除图片后必须改回居中 */
+html[data-has-hero] .hero .stack {
+	text-align: center;
+}
+
+html[data-has-hero] .hero .copy {
+	align-items: center;
+}
+
+html[data-has-hero] .hero .actions {
+	justify-content: center;
+}
+
+html[data-has-hero] .hero h1 {
+	font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+
+/* hero 标题：逐字弹跳入场（配合 zh-optimize.ts 把标题拆成 span.zh-char）
+   只动画 transform/opacity（GPU 合成，不触发布局/重绘），一次性播放零常驻开销；
+   prefers-reduced-motion 时完全禁用（可访问性 + 静默降级） */
+html[data-has-hero] .hero h1 .zh-char {
+	display: inline-block;
+	animation: zh-char-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes zh-char-in {
+	0% {
+		opacity: 0;
+		transform: translateY(0.9em) scale(0.9);
+	}
+	55% {
+		opacity: 1;
+		transform: translateY(-0.14em) scale(1.03); /* 轻微过冲回弹 */
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* 依次入场：每字延迟 0.09s（覆盖到 8 个字，超出部分不延迟同时入场） */
+html[data-has-hero] .hero h1 .zh-char:nth-child(2) {
+	animation-delay: 0.09s;
+}
+html[data-has-hero] .hero h1 .zh-char:nth-child(3) {
+	animation-delay: 0.18s;
+}
+html[data-has-hero] .hero h1 .zh-char:nth-child(4) {
+	animation-delay: 0.27s;
+}
+html[data-has-hero] .hero h1 .zh-char:nth-child(5) {
+	animation-delay: 0.36s;
+}
+html[data-has-hero] .hero h1 .zh-char:nth-child(6) {
+	animation-delay: 0.45s;
+}
+html[data-has-hero] .hero h1 .zh-char:nth-child(7) {
+	animation-delay: 0.54s;
+}
+html[data-has-hero] .hero h1 .zh-char:nth-child(8) {
+	animation-delay: 0.63s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html[data-has-hero] .hero h1 .zh-char {
+		animation: none;
+	}
+}
+
+html[data-has-hero] .hero .tagline {
+	font-size: clamp(1rem, 1.6vw, 1.25rem);
+	color: var(--sl-color-gray-2);
+}
+
+/* hero 按钮：复刻 DeepSeek Harness 官网胶囊交互
+   （1px 渐变 hairline 描边 + 双层外发光 + 玻璃拟态；hover 光晕增强 + 上浮）
+   纯 CSS 双渐变技巧：内容底走 padding-box、渐变描边走 border-box，单元素实现，
+   覆盖 nova LinkButton 的 Tailwind 实底样式（zh.css 无 layer，优先级更高）。
+   尺寸参数对齐官网 ds-btn-m：文字 15px / 行高 120% / padding 11px 18px / gap 6px */
+html[data-has-hero] .hero .actions a {
+	border-radius: 9999px;
+	font-size: 0.9375rem; /* 15px 官网同款 */
+	line-height: 1.2; /* 官网 120% */
+	padding: 0.6875rem 1.125rem; /* 11px 18px 官网同款 */
+	gap: 0.375rem; /* 6px 官网同款 */
+	color: var(--sl-color-text);
+	background:
+		linear-gradient(
+				color-mix(in srgb, var(--sl-color-bg) 70%, transparent),
+				color-mix(in srgb, var(--sl-color-bg) 70%, transparent)
+			)
+			padding-box,
+		linear-gradient(
+				135deg,
+				rgba(255, 255, 255, 0.55) 0%,
+				rgba(255, 255, 255, 0.08) 35%,
+				rgba(255, 255, 255, 0.04) 65%,
+				rgba(255, 255, 255, 0.35) 100%
+			)
+			border-box;
+	box-shadow:
+		0 0 16px rgba(255, 255, 255, 0.06),
+		0 0 32px rgba(255, 255, 255, 0.03),
+		0 4px 16px var(--zh-shadow-md);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	transition:
+		box-shadow 0.25s ease,
+		transform 0.25s ease,
+		color 0.25s ease;
+}
+
+html[data-has-hero] .hero .actions a:hover,
+html[data-has-hero] .hero .actions a:focus-visible {
+	transform: translateY(-2px);
+	box-shadow:
+		0 0 20px var(--zh-brand-glow),
+		0 0 40px var(--zh-brand-glow),
+		0 8px 24px var(--zh-shadow-md);
+}
+
+/* 亮色主题：白色渐变描边在亮底上不可见，换品牌蓝渐变描边 + 蓝光晕 */
+:root[data-theme='light'] html[data-has-hero] .hero .actions a {
+	background:
+		linear-gradient(var(--sl-color-bg), var(--sl-color-bg)) padding-box,
+		linear-gradient(
+				135deg,
+				hsla(217, 88%, 52%, 0.5) 0%,
+				hsla(217, 88%, 52%, 0.1) 35%,
+				hsla(217, 88%, 52%, 0.06) 65%,
+				hsla(217, 88%, 52%, 0.32) 100%
+			)
+			border-box;
+	box-shadow:
+		0 0 16px hsla(217, 88%, 52%, 0.12),
+		0 4px 16px var(--zh-shadow-md);
+}
+
+:root[data-theme='light'] html[data-has-hero] .hero .actions a:hover,
+:root[data-theme='light'] html[data-has-hero] .hero .actions a:focus-visible {
+	box-shadow:
+		0 0 20px hsla(217, 88%, 52%, 0.25),
+		0 0 40px hsla(217, 88%, 52%, 0.15),
+		0 8px 24px var(--zh-shadow-md);
+}
+
+/* 主次区分：第一个按钮（入站必读）实心品牌蓝 + 白字 + 蓝光晕，
+   第二个按钮保持渐变描边玻璃胶囊（选择器：actions 下第一个 span 内的 a，
+   注意 a 不是 actions 的直接子元素，不能用 a:first-child） */
+html[data-has-hero] .hero .actions > span:first-child a {
+	background: linear-gradient(135deg, hsl(217, 88%, 55%), hsl(217, 88%, 48%));
+	color: #fff;
+	border: 1px solid transparent;
+	box-shadow:
+		0 0 20px var(--zh-brand-glow),
+		0 4px 16px var(--zh-shadow-md);
+}
+
+html[data-has-hero] .hero .actions > span:first-child a:hover,
+html[data-has-hero] .hero .actions > span:first-child a:focus-visible {
+	transform: translateY(-2px);
+	background: linear-gradient(135deg, hsl(217, 88%, 60%), hsl(217, 88%, 52%));
+	box-shadow:
+		0 0 28px var(--zh-brand-glow),
+		0 0 48px var(--zh-brand-glow),
+		0 8px 24px var(--zh-shadow-md);
+}
+
+/* hero 按钮图标：统一尺寸 + 块级显示（16px，官网 ds-btn-m svg 同款）
+   两个按钮的图标分别来自 LinkButtonIcon（block size-5）与 starlight Icon（内联 svg），
+   渲染方式不同导致按钮高度微差；统一后胶囊等高 */
+html[data-has-hero] .hero .actions a svg {
+	display: block;
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+}
+
+/* ── 11. 文章页头部（元信息，配合 PageTitle.astro） ──
+   面包屑：已关闭（用户要求；保留组件与逻辑，需要时可恢复 display:flex） */
+.zh-breadcrumbs {
+	display: none;
+}
+
+.zh-breadcrumbs a {
+	color: var(--sl-color-gray-3);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.zh-breadcrumbs a:hover {
+	color: var(--zh-article-active-text);
+}
+
+.zh-breadcrumbs .zh-crumb-current {
+	color: var(--sl-color-gray-2);
+	font-weight: 500;
+}
+
+.zh-breadcrumbs .zh-crumb-sep {
+	color: var(--sl-color-gray-4);
+	user-select: none;
+}
+
+/* 文章页 H1 精修：品牌蓝渐变文字 + 底部 hairline 分隔线
+   （仅非 hero 页面；首页 hero 标题已居中 + 逐字动画，不受影响。
+    fallback：不支持 background-clip:text 时退化为纯品牌色文字） */
+html:not([data-has-hero]) [data-page-title] {
+	background: linear-gradient(120deg, var(--zh-brand), hsl(217, 88%, 68%));
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: var(--zh-brand-strong); /* fallback 底色，clip 生效时被透明覆盖 */
+	-webkit-text-fill-color: transparent; /* Safari 渐变文字 */
+	padding-bottom: 0.75rem;
+	border-bottom: 1px solid
+		color-mix(in srgb, var(--sl-color-accent) 25%, transparent);
+}
+
+.zh-page-desc {
+	margin-top: 0.75rem;
+	font-size: 1rem;
+	color: var(--sl-color-gray-2);
+}
+
+.zh-page-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+	font-size: 0.8125rem;
+	color: var(--sl-color-gray-3);
 }

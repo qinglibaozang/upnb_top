@@ -1,0 +1,115 @@
+---
+// 覆盖 starlight 默认 PageTitle：文章页头部"门户化"
+// 1. 面包屑：分类 › 分组 › 当前页（starlight 0.41 已移除默认面包屑，这里补上）
+// 2. 标题下方元信息：description + 更新时间（原本在页脚的 LastUpdated 移到这里，
+//    与页脚 EditLink 分工，避免更新时间重复显示）
+//
+// 数据来源：
+// - 当前分类名：starlight-sidebar-topics 注入的 Astro.locals.starlightSidebarTopics.topics
+// - 侧边栏树：Astro.locals.starlightRoute.sidebar（含 isCurrent 标记）
+// - 更新时间：Astro.locals.starlightRoute.lastUpdated
+
+const { entry, sidebar, lastUpdated, lang } = Astro.locals.starlightRoute;
+const { starlightSidebarTopics } = Astro.locals;
+
+const title = entry.data.title;
+const description = entry.data.description as string | undefined;
+
+// 更新时间：优先 starlight 标准 lastUpdated（frontmatter 或 git 历史），
+// 缺失时回退到内容里的 date 字段（本项目文章 frontmatter 常用 date: YYYY-MM-DD）
+const rawDate: Date | string | undefined =
+	(lastUpdated as Date | undefined) ?? (entry.data as { date?: Date | string }).date;
+const metaDate: Date | undefined = rawDate instanceof Date ? rawDate : rawDate ? new Date(String(rawDate)) : undefined;
+
+// 当前分类（sidebar-topics 的 topic）
+const topic = starlightSidebarTopics?.topics?.find((t: any) => t.isCurrent);
+
+// 侧边栏树最小结构（避免依赖 starlight 内部类型）
+interface SidebarNode {
+	type?: string;
+	label?: string;
+	href?: string;
+	isCurrent?: boolean;
+	entries?: SidebarNode[];
+}
+
+interface Crumb {
+	label: string;
+	href?: string;
+}
+
+/** 递归找当前页在侧边栏树中的路径（从根到当前页） */
+function findCrumbPath(entries: SidebarNode[], trail: Crumb[] = []): Crumb[] | null {
+	for (const node of entries) {
+		if (node.type === 'link') {
+			if (node.isCurrent) return [...trail, { label: node.label ?? '', href: node.href }];
+		} else if (node.entries) {
+			const found = findCrumbPath(node.entries, [...trail, { label: node.label ?? '' }]);
+			if (found) return found;
+		}
+	}
+	return null;
+}
+
+const trail = findCrumbPath((sidebar ?? []) as SidebarNode[]);
+// 分组（不含当前页自身）
+const groups = trail ? trail.slice(0, -1) : [];
+---
+
+<nav class="zh-breadcrumbs" aria-label="面包屑">
+	{
+		topic && (
+			<a href={topic.link} class="zh-crumb-link">
+				{topic.label}
+			</a>
+		)
+	}
+	{
+		topic && <span class="zh-crumb-sep" aria-hidden="true">›</span>
+	}
+	{
+		groups.map((group, i) => (
+			<Fragment>
+				{group.href ? (
+					<a href={group.href} class="zh-crumb-link">
+						{group.label}
+					</a>
+				) : (
+					<span class="zh-crumb-group">{group.label}</span>
+				)}
+				<span class="zh-crumb-sep" aria-hidden="true">›</span>
+			</Fragment>
+		))
+	}
+	<span class="zh-crumb-current">{title}</span>
+</nav>
+
+<h1 id="_top" data-page-title>{title}</h1>
+
+{
+	description && <p class="zh-page-desc">{description}</p>
+}
+
+{
+	metaDate && (
+		<p class="zh-page-meta">
+			<span>更新于</span>
+			<time datetime={metaDate.toISOString()}>
+				{metaDate.toLocaleDateString(lang, { dateStyle: 'medium', timeZone: 'UTC' })}
+			</time>
+		</p>
+	)
+}
+
+<style>
+	/* 复刻 starlight 默认 PageTitle 的 h1 样式（覆盖组件后原组件样式不生效） */
+	@layer starlight.core {
+		h1 {
+			margin-top: 1rem;
+			font-size: var(--sl-text-h1);
+			line-height: var(--sl-line-height-headings);
+			font-weight: 600;
+			color: var(--sl-color-white);
+		}
+	}
+</style>
