@@ -43,7 +43,7 @@
 - TOC mark 线不显示：链接 `a` 有 `overflow:hidden`（ellipsis 必需）裁剪 `::before`，mark 线改挂到 `li` 上
 - TOC 嵌套出现两层 mark 线：`:has(a)` 为后代匹配，h2 的 li 因内部 h3 的 a 是当前项而误匹配 → 改 `:has(>a)` 直接子级匹配
 - 学科UP主 页面 title 重复 5 次（历史误编辑）→ 修正为「学科UP主」，并删除残留测试内容「123321」
-- 移动端侧边栏抽屉层叠与滚动修复：z-index 调至 TOC 抽屉之上（`calc(var(--sl-z-index-toc)+1)`，此前 0 被正文流 `<main>` 盖住、1 被移动端 TOC 顶条盖住）；补齐 body 滚动锁定（nova 覆盖 MobileMenuToggle 组件时丢失了 starlight 原版 `[data-mobile-menu-expanded]{overflow:hidden}`），抽屉展开时页面锁定、滚动只作用于抽屉内部
+- 移动端侧边栏抽屉层叠与滚动修复：左栏 z-index 桌面/移动端分案（桌面 `0` 与正文流同层、底栏靠 DOM 顺序可见；移动端抽屉 `calc(var(--sl-z-index-toc)+1)`=5 全屏 modal 盖住 TOC 顶条与正文——固定底栏的 z-index 仅在父层叠上下文内有效，左栏用数字层级会整层压过内容区，故不能一值通吃）；补齐 body 滚动锁定（nova 覆盖 MobileMenuToggle 组件时丢失了 starlight 原版 `[data-mobile-menu-expanded]{overflow:hidden}`），抽屉展开时页面锁定、滚动只作用于抽屉内部
 
 ## 2026-08-15
 ### 新增

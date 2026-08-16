@@ -648,14 +648,19 @@ main {
 #starlight__sidebar {
 	border-color: transparent;
 	box-shadow: none;
-	/* 左栏层叠：必须高于正文流与移动端 TOC 抽屉，且低于固定底栏。
-	   - 曾用 z-index:0（防盖底栏）→ 0 与正文流 auto 同层，DOM 靠后的 <main>
-	     盖住左栏：移动端抽屉（max-md:w-full）展开时透出正文（"侧边栏透明"）；
-	   - 提到 1 → 高于正文流，但移动端 TOC 抽屉 z-index:var(--sl-z-index-toc)=4
-	     仍盖住侧边栏（fixed 顶条 + 不透明背景）；
-	   - 现取 calc(var(--sl-z-index-toc) + 1)=5：高于 TOC 抽屉与正文流，
-	     且远低于固定底栏（z-index:2147483647），三者层叠关系才正确 */
-	z-index: calc(var(--sl-z-index-toc) + 1) !important;
+	/* 左栏层叠：桌面/移动端分开处理（固定底栏的 z-index 只在父层叠上下文内有效，
+	   父容器在普通流——左栏一旦用数字 z-index（>0）就会盖住底栏，此前 5/1 均重演）：
+	   - 桌面（≥50rem）：z-index:0 与正文流同层，靠 DOM 顺序（main/底栏在后）盖住左栏
+	     ——底栏可见、左栏窄条不遮挡正文，均正常；
+	   - 移动端（<50rem）：抽屉是全屏 modal，z-index 提到 TOC 抽屉之上
+	     （calc(var(--sl-z-index-toc)+1)=5）：盖住正文与 TOC 顶条（z-index:4），
+	     全屏抽屉盖住底栏属 modal 正常行为 */
+	z-index: 0 !important;
+}
+@media (max-width: 50rem) {
+	#starlight__sidebar {
+		z-index: calc(var(--sl-z-index-toc) + 1) !important;
+	}
 }
 
 .right-sidebar {
