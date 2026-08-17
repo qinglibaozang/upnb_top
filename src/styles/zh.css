@@ -564,12 +564,12 @@ mobile-starlight-toc a[aria-current='true'] {
 }
 
 /* 顶部导航栏：半透明毛玻璃吸顶（nova 默认 backdrop-blur 8px，这里增强模糊+提饱和；
-   背景 92% 不透明，滚动时正文隐约透出，大厂吸顶导航标配） */
+   背景 96% 不透明，滚动时正文隐约透出，大厂吸顶导航标配） */
 header {
 	width: 100vw; /* 固定为视口宽：防止页面滚动条出现时 header 变窄导致右侧工具区位移 */
 	border-color: var(--zh-line);
 	box-shadow: 0 2px 8px var(--zh-shadow-md);
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 92%, transparent);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 96%, transparent);
 	backdrop-filter: blur(16px) saturate(1.5);
 	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
@@ -595,7 +595,7 @@ main {
 /* 固定底栏本身（样式放全局而非组件 scoped，规避 @layer/scoped 组合的层叠坑；
    选择器直接命中，unlayered 优先级最高）：
    吸在视口底部、不随文章滚动上移，样式对齐顶部导航栏
-   （毛玻璃 blur16 + 提饱和、92% 不透明底、hairline 上边框、向上投影、100vw 防变窄） */
+   （毛玻璃 blur16 + 提饱和、96% 不透明底、hairline 上边框、向上投影、100vw 防变窄） */
 .zh-footer-bar {
 	position: fixed;
 	left: 0;
@@ -613,7 +613,7 @@ main {
 	font-size: var(--sl-text-xs);
 	color: var(--sl-color-gray-3);
 	border-top: 1px solid var(--zh-line);
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 92%, transparent);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 96%, transparent);
 	backdrop-filter: blur(16px) saturate(1.5);
 	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 	box-shadow: 0 -2px 8px var(--zh-shadow-md);
@@ -1160,7 +1160,7 @@ mark.zh-search-hl {
 	right: 0;
 	z-index: 200;
 	height: 3.5rem;
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 92%, transparent);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 96%, transparent);
 	backdrop-filter: blur(16px) saturate(1.5);
 	-webkit-backdrop-filter: blur(16px) saturate(1.5);
 	border-top: 1px solid var(--zh-line);
