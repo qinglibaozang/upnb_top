@@ -153,6 +153,8 @@ export default defineConfig({
 				Footer: './src/components/Footer.astro',
 				// 覆盖 PageTitle：面包屑 + 描述 + 更新时间（文章页头部门户化）
 				PageTitle: './src/components/PageTitle.astro',
+				// 覆盖 SkipLink：挂载移动端底部 dock
+				SkipLink: './src/components/SkipLink.astro',
 			},
 			// 站点 logo（顶部导航站点名前）
 			logo: {

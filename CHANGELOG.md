@@ -1,5 +1,14 @@
 # 更新日志
 
+## 2026-08-17
+### 新增
+- 移动端底部 dock 导航栏（`MobileDock.astro`）：固定视口底部、毛玻璃风格与顶栏一致，4 个快捷入口（首页/入站必读/学习资源/搜索）；仅移动端显示（`< 50rem`），首页不展示（`data-has-hero` 判断），非首页展示 dock 替代页脚
+- SkipLink 组件覆盖：挂载 MobileDock 到 body 层级（规避 header `backdrop-filter` 创建包含块导致 `position: fixed` 失效的问题）
+
+### 变更
+- 页脚（`Footer.astro`）改为仅首页显示（`Astro.url.pathname === '/'`），其他页面不渲染页脚 HTML
+- `astro.config.mjs` 新增 SkipLink 组件覆盖注册
+
 ## 2026-08-16
 ### 新增
 - hero 按钮复刻 DeepSeek Harness 官网胶囊：1px 渐变 hairline 描边（内容底 padding-box + 渐变描边 border-box 双渐变）+ 双层外发光 + 玻璃拟态（blur 10px）+ hover 光晕上浮；参数对齐官网 ds-btn-m（文字 15px / 行高 120% / padding 11×18px / 图标间距 6px / 图标 16px / 高度约 40px）

@@ -601,8 +601,7 @@ main {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 2147483647 !important; /* 必须绝对最上层：左侧边栏（fixed，z-index 曾压过底栏）
-	                                 盖住底栏；实测需将左栏压到 z-index:0 后底栏才可见 */
+	z-index: 2147483647 !important;
 	width: 100vw;
 	height: var(--sl-nav-height); /* 与顶部导航栏同高（3.5rem，用户要求） */
 	flex-direction: row;
@@ -643,8 +642,6 @@ main {
 	}
 }
 
-/* 三栏分割线：已去除（用户要求），左侧边栏与右侧 TOC 均无边线、无投影，
-   视觉上三栏融为一个整体；保留规则可随时恢复 */
 #starlight__sidebar {
 	border-color: transparent;
 	box-shadow: none;
@@ -1152,4 +1149,54 @@ mark.zh-search-hl {
 	padding: 0 0.1em;
 	box-decoration-break: clone;
 	-webkit-box-decoration-break: clone;
+}
+
+/* 移动端底部 dock 导航栏 */
+.zh-mobile-dock {
+	display: none;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 200;
+	height: 3.5rem;
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 78%, transparent);
+	backdrop-filter: blur(16px) saturate(1.5);
+	-webkit-backdrop-filter: blur(16px) saturate(1.5);
+	border-top: 1px solid var(--zh-line);
+	box-shadow: 0 -2px 8px var(--zh-shadow-md);
+	justify-content: space-around;
+	align-items: center;
+	padding: 0 0.5rem;
+}
+.zh-mobile-dock__item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15rem;
+	background: none;
+	border: none;
+	color: var(--sl-color-gray-3);
+	font-size: 0.65rem;
+	text-decoration: none;
+	padding: 0.25rem 0.5rem;
+	cursor: pointer;
+	transition: color 0.15s;
+}
+.zh-mobile-dock__item:hover,
+.zh-mobile-dock__item:active {
+	color: var(--sl-color-white);
+}
+@media (max-width: 49.999rem) {
+	.zh-mobile-dock {
+		display: flex;
+	}
+	/* 首页（有 hero）不展示 dock */
+	html[data-has-hero] .zh-mobile-dock {
+		display: none;
+	}
+	.main-frame {
+		padding-bottom: 3.5rem !important;
+	}
+	/* 首页有页脚，非首页页脚由组件层面不渲染 */
 }
