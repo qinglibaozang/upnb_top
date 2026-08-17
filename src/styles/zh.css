@@ -86,17 +86,16 @@
 	line-height: 1.75rem;
 }
 
-/* 表格：13px 与代码同级 + 投影增强层次。
-   保留 starlight 默认 display:block + overflow:auto 横向滚动（宽表格可左右滑），
-   只覆盖字号/圆角/边框风格（用户要求：表格横滚修复） */
+/* 表格：13px + 圆角 + 分隔线 + 投影 */
 .sl-markdown-content table {
 	width: 100%;
-	font-size: 0.8125rem; /* 13px */
+	font-size: 0.8125rem;
 	line-height: 1.6;
 	border-collapse: separate;
 	border-spacing: 0;
 	border-radius: 0.5rem;
 	box-shadow: 0 1px 4px var(--zh-shadow-sm);
+	overflow: hidden;
 }
 
 .sl-markdown-content thead {
@@ -105,7 +104,19 @@
 
 .sl-markdown-content thead th {
 	font-weight: 600;
-	border-bottom: 1px solid var(--sl-color-hairline);
+	padding: 0.6rem 1rem;
+	border-bottom: 2px solid var(--sl-color-hairline);
+	text-align: start;
+}
+
+.sl-markdown-content tbody td {
+	padding: 0.5rem 1rem;
+	border-bottom: 1px solid var(--sl-color-gray-5);
+	vertical-align: baseline;
+}
+
+.sl-markdown-content tbody tr:last-child td {
+	border-bottom: none;
 }
 
 .sl-markdown-content tbody tr {
