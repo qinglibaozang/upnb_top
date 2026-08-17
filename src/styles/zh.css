@@ -1200,3 +1200,19 @@ mark.zh-search-hl {
 	}
 	/* 首页有页脚，非首页页脚由组件层面不渲染 */
 }
+
+/* 移动端 TOC：统一字体，层级缩进 */
+mobile-starlight-toc .dropdown {
+	padding-inline-start: 1rem;
+}
+mobile-starlight-toc .dropdown a {
+	font-size: var(--sl-text-sm) !important;
+	font-weight: 400 !important;
+}
+mobile-starlight-toc .dropdown ul ul {
+	margin-inline-start: 1rem;
+}
+
+
+
+
