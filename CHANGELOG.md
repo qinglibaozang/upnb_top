@@ -1,5 +1,16 @@
 # 更新日志
 
+## 2026-08-18
+### 变更
+- 移除 `starlight-theme-nova` 依赖，主题迁移至 Starlight 原生 + 自有 `zh.css` 设计系统（保留视觉风格与组件能力，零新增依赖）
+- `Header.astro` 重写为 Starlight 原生三栏 grid 布局（title-wrapper + 搜索 + right-group），社交图标 / 主题切换 / 语言选择回到顶栏右上角（此前受 `.zh-header-search` 绝对定位影响被挤到左上）
+- `TwoColumnContent.astro` 改为直接内联 Starlight 原生实现（不再依赖 `virtual:starlight/components/TwoColumnContent.astro` 虚拟模块），并修复 `contentWidth` 失效：恢复外层注入 `--sl-content-width` 的 div，frontmatter `contentWidth` 重新生效
+- `Footer.astro` 重写：首页显示版权条（© 2026 情礼宝藏 + ICP 备案），其他页面显示 Starlight 默认页脚结构（EditLink + LastUpdated + Pagination + Built with Starlight）；不再 import `virtual:starlight/components/Footer`（该虚拟模块已被本组件覆盖，会循环导入导致栈溢出）
+
+### 新增
+- 主题切换按钮（`ThemeToggle.astro`）：Nova 同款太阳/月亮图标按钮（Tabler 图标），点击在明暗之间切换，hover 灰底圆角、active 微缩；复用 Starlight 原生主题系统（`data-theme` 属性 + `starlight-theme` localStorage），与 `zh.css` 变量完全兼容
+- `MobileMenuFooter.astro` 覆盖：移动端菜单内主题切换同步换用 Nova 风格图标按钮，与顶栏一致
+
 ## 2026-08-17
 ### 新增
 - 移动端底部 dock 导航栏（`MobileDock.astro`）：固定视口底部、毛玻璃风格与顶栏一致，4 个快捷入口（首页/入站必读/学习资源/搜索）；仅移动端显示（`< 50rem`），首页不展示（`data-has-hero` 判断），非首页展示 dock 替代页脚

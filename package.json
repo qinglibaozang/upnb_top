@@ -14,8 +14,7 @@
     "@node-rs/jieba": "^2.0.2",
     "astro": "^7.1.6",
     "jieba-wasm": "^2.4.0",
-    "starlight-sidebar-topics": "^0.8.0",
-    "starlight-theme-nova": "^0.12.2"
+    "starlight-sidebar-topics": "^0.8.0"
   },
   "devDependencies": {
     "typescript": "^5.0.2"

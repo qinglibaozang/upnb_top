@@ -1,0 +1,36 @@
+---
+// 覆盖移动端菜单底栏：主题切换用 Nova 风格图标按钮，与顶栏一致
+import LanguageSelect from 'virtual:starlight/components/LanguageSelect';
+import SocialIcons from 'virtual:starlight/components/SocialIcons';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<div class="mobile-preferences sl-flex">
+	<div class="social-icons">
+		<SocialIcons />
+	</div>
+	<ThemeToggle />
+	<LanguageSelect />
+</div>
+
+<style>
+	@layer starlight.core {
+		.social-icons {
+			display: flex;
+			margin-inline-end: auto;
+			gap: 1rem;
+			align-items: center;
+			padding-block: 1rem;
+		}
+		.social-icons:empty {
+			display: none;
+		}
+		.mobile-preferences {
+			justify-content: space-between;
+			flex-wrap: wrap;
+			border-top: 1px solid var(--sl-color-gray-6);
+			column-gap: 1rem;
+			padding: 0.5rem 0;
+		}
+	}
+</style>

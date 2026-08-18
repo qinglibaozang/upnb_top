@@ -1,17 +1,18 @@
 ---
-// 覆盖 nova 的 Header：移动端布局重排
+// 覆盖 starlight 默认 Header：移动端布局重排
 const { hasSidebar } = Astro.locals.starlightRoute
 
 import LanguageSelect from 'virtual:starlight/components/LanguageSelect'
 import Search from 'virtual:starlight/components/Search'
 import SiteTitle from 'virtual:starlight/components/SiteTitle'
 import SocialIcons from 'virtual:starlight/components/SocialIcons'
-import ThemeSelect from 'virtual:starlight/components/ThemeSelect'
-import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle'
+import ThemeToggle from './ThemeToggle.astro'
 
-import options from 'virtual:starlight-theme-nova/user-config'
-
-const nav = options.nav ?? []
+// 顶栏导航链接（直接从 Starlight 原生配置读取，不再依赖 nova user-config）
+const nav = [
+	{ label: '首页', href: '/' },
+	{ label: '使用指南', href: '/00入站必读/01使用指南/' },
+]
 
 // 处理 nav 的国际化（单语言站点配置全是纯字符串，直接取字符串即可；
 // 兼容 i18n 对象时取 root 键。注：此前实现引用了不存在的 route.currentLocale
@@ -19,48 +20,78 @@ const nav = options.nav ?? []
 const getText = (v) => (typeof v === 'string' ? v : v?.root)
 ---
 
-<div class="relative box-border flex h-full items-center gap-2">
-  <!-- 移动端：左侧菜单抽屉按钮 -->
-  {
-    hasSidebar && (
-      <div class="flex items-center md:hidden print:hidden">
-        <MobileMenuToggle />
-      </div>
-    )
-  }
-
-  <!-- 标题：移动端绝对居中（zh-nav-title 在 zh.css 定义，不依赖 Tailwind 预编译）；桌面靠左 -->
-  <div
-    class="-m-3 zh-nav-title flex min-w-0 overflow-clip p-3"
-  >
-    <SiteTitle />
-  </div>
-
-  <!-- 桌面端：导航链接（移动端隐藏） -->
-  <nav
-    class="hidden flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium md:flex xl:gap-6 xl:pl-6"
-  >
-    {
-      nav.map((item) => (
-        <a
-          class="-m-1.5 rounded-md p-1.5 text-(--sl-color-gray-3) no-underline hover:text-(--sl-color-white) focus-visible:outline-offset-0"
-          href={getText(item.href)}
-        >
-          {getText(item.label)}
-        </a>
-      ))
-    }
-  </nav>
-
-  <!-- 右侧：搜索 + 明暗切换（移动端显示），桌面加宽搜索框 -->
-  <div class="zh-nav-right flex items-center gap-2 print:hidden">
-    <div class="zh-header-search">
-      <Search />
-    </div>
-    <ThemeSelect />
-    <div class="hidden items-center gap-2 md:flex">
-      <SocialIcons />
-      <LanguageSelect />
-    </div>
-  </div>
+<div class="header">
+	<div class="title-wrapper sl-flex">
+		<SiteTitle />
+	</div>
+	<div class="sl-flex print:hidden">
+		<div class="zh-header-search">
+			<Search />
+		</div>
+	</div>
+	<div class="sl-hidden md:sl-flex print:hidden right-group">
+		<div class="sl-flex social-icons">
+			<SocialIcons />
+		</div>
+		<ThemeToggle />
+		<LanguageSelect />
+	</div>
 </div>
+
+<style>
+	@layer starlight.core {
+		.header {
+			display: flex;
+			gap: var(--sl-nav-gap);
+			justify-content: space-between;
+			align-items: center;
+			height: 100%;
+		}
+
+		.title-wrapper {
+			overflow: clip;
+			padding: 0.25rem;
+			margin: -0.25rem;
+			min-width: 0;
+		}
+
+		.right-group,
+		.social-icons {
+			gap: 1rem;
+			align-items: center;
+		}
+		.social-icons::after {
+			content: '';
+			height: 2rem;
+			border-inline-end: 1px solid var(--sl-color-gray-5);
+		}
+
+		@media (min-width: 50rem) {
+			:global(:root[data-has-sidebar]) {
+				--__sidebar-pad: calc(2 * var(--sl-nav-pad-x));
+			}
+			:global(:root:not([data-has-toc])) {
+				--__toc-width: 0rem;
+			}
+			.header {
+				--__sidebar-width: max(0rem, var(--sl-content-inline-start, 0rem) - var(--sl-nav-pad-x));
+				--__main-column-fr: calc(
+					(
+							100% + var(--__sidebar-pad, 0rem) - var(--__toc-width, var(--sl-sidebar-width)) -
+								(2 * var(--__toc-width, var(--sl-nav-pad-x))) - var(--sl-content-inline-start, 0rem) -
+								var(--sl-content-width)
+						) / 2
+				);
+				display: grid;
+				grid-template-columns:
+					minmax(
+						calc(var(--__sidebar-width) + max(0rem, var(--__main-column-fr) - var(--sl-nav-gap))),
+						auto
+					)
+					1fr
+					auto;
+				align-content: center;
+			}
+		}
+	}
+</style>

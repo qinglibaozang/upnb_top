@@ -6,6 +6,9 @@ dist/
 # dependencies
 node_modules/
 
+# local pnpm store (miscreated under project root)
+.pnpm-store/
+
 # logs
 npm-debug.log*
 yarn-debug.log*
