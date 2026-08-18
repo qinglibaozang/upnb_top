@@ -1,5 +1,19 @@
 # 更新日志
 
+## 2026-08-19
+### 修复
+- 修复 View Transitions 切页后主题跳变：Starlight 服务端渲染固定输出 `<html data-theme="dark">`，VT 切页时 `swapRootAttributes` 会用新文档的 dark 覆盖当前主题，而 ThemeProvider 内联脚本被判定已执行不重跑，导致浅色模式点链接切页后变暗——`Head.astro` 新增 `astro:before-swap` 监听，按用户偏好（localStorage `starlight-theme`，无则跟随系统）在 swap 前修正新文档的 `data-theme`，明暗双向保持
+- 移动端侧边栏抽屉按钮与顶栏其他按钮视觉统一：改透明底 + 6px 小圆角 + 无阴影 + hover 浅灰（原生 MobileMenuToggle 是圆形实心底+阴影，与搜索/主题按钮违和），并从右上角移到左上角、标题绝对居中
+- 回到顶部按钮改版：48px 圆形实底 → 40px 透明圆钮 + 阅读进度环（不显示百分比数字）+ 居中向上箭头（常显），hover 主题色微放大
+- 右侧边栏（TOC）不再与正文、左侧边栏重叠：原生 `.right-sidebar` 的 `width: 100%` 在 fixed 下相对视口会铺满整个屏幕盖住左栏，改为 `inset-inline-end: 0` + 固定宽度 `--sl-sidebar-width`（300px）贴视口右缘
+
+### 变更
+- 侧边栏背景与正文统一：桌面端 Starlight 原生用 `--sl-color-bg-sidebar`（暗色下为 gray-6 深灰，比正文 `--sl-color-bg` 浅一号，视觉上分栏两块色），改为 `--sl-color-bg` 与正文同色（明暗主题、桌面/移动端一致）
+- 移除右侧边栏与正文之间的分割线（`.right-sidebar` 的 `border-inline-start`）
+- 标题下方分割线改受 `contentWidth` 控制：原画在 `.content-panel + .content-panel` 顶部（宽度含面板内边距、全长超出正文），改为画在正文内容容器 `.sl-container` 顶部（受 `--sl-content-width` 约束，线宽与正文一致）
+- 临时关闭侧边栏顶部分类切换（`starlightSidebarTopics` 插件注释，查看默认扁平侧边栏效果）
+- 清理全站 nova 痕迹：代码注释与文档中所有对旧主题的引用改为中性措辞（主题切换按钮/顶栏/侧边栏/hero 相关注释、AGENTS.md、agents/技术栈.md）
+
 ## 2026-08-18
 ### 变更
 - 移除 `starlight-theme-nova` 依赖，主题迁移至 Starlight 原生 + 自有 `zh.css` 设计系统（保留视觉风格与组件能力，零新增依赖）
@@ -8,8 +22,8 @@
 - `Footer.astro` 重写：首页显示版权条（© 2026 情礼宝藏 + ICP 备案），其他页面显示 Starlight 默认页脚结构（EditLink + LastUpdated + Pagination + Built with Starlight）；不再 import `virtual:starlight/components/Footer`（该虚拟模块已被本组件覆盖，会循环导入导致栈溢出）
 
 ### 新增
-- 主题切换按钮（`ThemeToggle.astro`）：Nova 同款太阳/月亮图标按钮（Tabler 图标），点击在明暗之间切换，hover 灰底圆角、active 微缩；复用 Starlight 原生主题系统（`data-theme` 属性 + `starlight-theme` localStorage），与 `zh.css` 变量完全兼容
-- `MobileMenuFooter.astro` 覆盖：移动端菜单内主题切换同步换用 Nova 风格图标按钮，与顶栏一致
+- 主题切换按钮（`ThemeToggle.astro`）：太阳/月亮图标按钮（Tabler 图标），点击在明暗之间切换，hover 灰底圆角、active 微缩；复用 Starlight 原生主题系统（`data-theme` 属性 + `starlight-theme` localStorage），与 `zh.css` 变量完全兼容
+- `MobileMenuFooter.astro` 覆盖：移动端菜单内主题切换同步换用同款图标按钮，与顶栏一致
 
 ## 2026-08-17
 ### 新增
@@ -61,11 +75,11 @@
 - 侧边栏「怎么还是粗体」：根因① starlight 默认 `.large`（顶层链接）`font-weight: 600`；根因② CSS minifier 把等于初始值的 `font-weight: 400`（含 `!important`）当冗余删除，删后回落 starlight 600——改用 `var(--zh-fw-sidebar-active)` 间接引用后稳定生效
 - 侧边栏字号/行高「改太小、行距变大」：`.entry-link` 类从未命中真实 DOM（链接实际只有 `large` 类），修正选择器为 `.sidebar-content a.large`
 - hero 按钮高度不一：两个按钮图标分别来自 LinkButtonIcon（`block size-5`）与 starlight Icon（内联 svg 基线空隙），统一 `svg { display:block; 1rem }` 后胶囊等高
-- hero 内容不居中：nova 桌面端左对齐（`text-align:start`/`flex-start`），补 stack/copy/actions 三条居中覆盖
+- hero 内容不居中：旧主题桌面端左对齐（`text-align:start`/`flex-start`），补 stack/copy/actions 三条居中覆盖
 - TOC mark 线不显示：链接 `a` 有 `overflow:hidden`（ellipsis 必需）裁剪 `::before`，mark 线改挂到 `li` 上
 - TOC 嵌套出现两层 mark 线：`:has(a)` 为后代匹配，h2 的 li 因内部 h3 的 a 是当前项而误匹配 → 改 `:has(>a)` 直接子级匹配
 - 学科UP主 页面 title 重复 5 次（历史误编辑）→ 修正为「学科UP主」，并删除残留测试内容「123321」
-- 移动端侧边栏抽屉层叠与滚动修复：左栏 z-index 桌面/移动端分案（桌面 `0` 与正文流同层、底栏靠 DOM 顺序可见；移动端抽屉 `calc(var(--sl-z-index-toc)+1)`=5 全屏 modal 盖住 TOC 顶条与正文——固定底栏的 z-index 仅在父层叠上下文内有效，左栏用数字层级会整层压过内容区，故不能一值通吃）；补齐 body 滚动锁定（nova 覆盖 MobileMenuToggle 组件时丢失了 starlight 原版 `[data-mobile-menu-expanded]{overflow:hidden}`），抽屉展开时页面锁定、滚动只作用于抽屉内部
+- 移动端侧边栏抽屉层叠与滚动修复：左栏 z-index 桌面/移动端分案（桌面 `0` 与正文流同层、底栏靠 DOM 顺序可见；移动端抽屉 `calc(var(--sl-z-index-toc)+1)`=5 全屏 modal 盖住 TOC 顶条与正文——固定底栏的 z-index 仅在父层叠上下文内有效，左栏用数字层级会整层压过内容区，故不能一值通吃）；补齐 body 滚动锁定（旧主题覆盖 MobileMenuToggle 组件时丢失了 starlight 原版 `[data-mobile-menu-expanded]{overflow:hidden}`），抽屉展开时页面锁定、滚动只作用于抽屉内部
 
 ## 2026-08-15
 ### 新增

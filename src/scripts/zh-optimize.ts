@@ -523,7 +523,7 @@ function initMobileMenuKeep() {
 	}
 
 	// 新页面加载：如有标记则自动展开移动菜单（文章链接不会设置标记，正常关闭）
-	// 用 window load 确保 nova 菜单组件初始化完成，避免其初始化时重置 body 属性
+	// 用 window load 确保菜单组件初始化完成，避免其初始化时重置 body 属性
 	if (sessionStorage.getItem('zh-expand-menu') === '1') {
 		sessionStorage.removeItem('zh-expand-menu');
 		if (isMobile()) {
@@ -567,31 +567,33 @@ function splitHeroTitleIn(doc: Document) {
 	}
 }
 
-/** 回到顶部按钮：圆形进度环 + 阅读百分比，点击平滑回顶 */
+/** 回到顶部按钮：进度圆环（阅读进度，不显示数字）+ 居中向上箭头，点击平滑回顶 */
 function initBackTop() {
 	const btn = document.createElement('button');
 	btn.className = 'zh-back-top';
 	btn.type = 'button';
 	btn.setAttribute('aria-label', '回到顶部');
 	btn.innerHTML =
-		'<svg viewBox="0 0 36 36" aria-hidden="true">' +
+		'<svg class="zh-bt-progress" viewBox="0 0 36 36" aria-hidden="true">' +
 		'<circle class="zh-bt-bg" cx="18" cy="18" r="16"></circle>' +
 		'<circle class="zh-bt-fg" cx="18" cy="18" r="16"></circle>' +
-		'</svg><span class="zh-bt-pct">0%</span>';
+		'</svg>' +
+		'<svg class="zh-bt-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+		'<path d="m6 15 6-6 6 6"></path>' +
+		'</svg>';
 	document.body.appendChild(btn);
 
 	const fg = btn.querySelector('.zh-bt-fg') as SVGCircleElement;
-	const pct = btn.querySelector('.zh-bt-pct') as HTMLElement;
 	const CIRC = 2 * Math.PI * 16;
 	fg.style.strokeDasharray = String(CIRC);
 	fg.style.strokeDashoffset = String(CIRC);
 
 	let shown = false;
 	const onScroll = () => {
+		// 进度环随阅读进度填充（仅视觉，不显示百分比数字）
 		const max = document.documentElement.scrollHeight - window.innerHeight;
 		const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
 		fg.style.strokeDashoffset = String(CIRC * (1 - p));
-		pct.textContent = Math.round(p * 100) + '%';
 		if (window.scrollY > 300 && !shown) {
 			btn.classList.add('show');
 			shown = true;

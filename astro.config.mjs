@@ -129,7 +129,8 @@ export default defineConfig({
 			plugins: [
 				// 侧边栏顶部分类切换（自动生成，新增文件夹零配置）
 				// exclude 兜底：未归入任何分类的页面不报错，走默认侧边栏
-				starlightSidebarTopics(autoTopics(), { exclude: ['**'] }),
+				// [临时] 关闭 topic 分类切换，查看默认侧边栏效果
+				// starlightSidebarTopics(autoTopics(), { exclude: ['**'] }),
 			],
 			title: '情礼宝藏', // 站点名称（顶栏标题 + 浏览器标签页）
 			// 自定义组件覆盖：移动端导航布局（菜单左/标题居中/搜索+明暗右）
@@ -143,7 +144,7 @@ export default defineConfig({
 				Search: './src/components/Search.astro',
 				// 覆盖 Footer：首页版权条 + 其他页面默认页脚
 				Footer: './src/components/Footer.astro',
-				// 覆盖 MobileMenuFooter：主题切换用 Nova 风格图标按钮
+				// 覆盖 MobileMenuFooter：社交链接 + 语言选择（主题切换在顶栏）
 				MobileMenuFooter: './src/components/MobileMenuFooter.astro',
 				// 覆盖 PageTitle：面包屑 + 描述 + 更新时间（文章页头部门户化）
 				PageTitle: './src/components/PageTitle.astro',

@@ -7,3 +7,30 @@ import Default from '@astrojs/starlight/components/Head.astro';
 
 <ClientRouter />
 <Default {...Astro.props} />
+
+<script is:inline>
+	// 修复 View Transitions 切页后主题跳变：
+	// Starlight 服务端渲染固定输出 <html data-theme="dark">（Page.astro 硬编码，服务端不知道用户偏好）。
+	// VT 切页时 Astro 的 swapRootAttributes 会用新文档的 data-theme 覆盖当前主题，
+	// 而 Starlight 的 ThemeProvider inline script 被 Astro 判定为「已执行」不会重跑恢复，
+	// 导致浅色模式点击侧边栏/标题等链接切页后变暗。
+	// 解法：在 swap 前按用户偏好（localStorage 或系统偏好）修正新文档，swap 时即生效、无闪烁。
+	document.addEventListener('astro:before-swap', (e) => {
+		const newDoc = e.newDocument
+		if (!newDoc?.documentElement) return
+		let theme
+		try {
+			theme = localStorage.getItem('starlight-theme')
+		} catch {
+			/* 隐私模式等场景忽略读取失败 */
+		}
+		// 与 Starlight ThemeProvider 相同的解析逻辑：无存储值时跟随系统偏好
+		const resolved =
+			theme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+		newDoc.documentElement.setAttribute(
+			'data-theme',
+			resolved === 'light' ? 'light' : 'dark'
+		)
+	})
+</script>

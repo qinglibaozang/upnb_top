@@ -40,7 +40,7 @@ astro dev --background
 
 ### 技术栈与版本策略
 
-- **Astro + Starlight** + **pnpm** + **TypeScript**（严格模式）；主题 `starlight-theme-nova` + `starlight-sidebar-topics`。
+- **Astro + Starlight** + **pnpm** + **TypeScript**（严格模式）；Starlight 原生布局 + 自有 `zh.css` 设计系统（`starlight-sidebar-topics` 分类切换插件）。
 - **版本策略：保持稳定，不追新**。以当前锁定版本为准（`package.json` / `pnpm-lock.yaml`）；升级必须经用户确认并说明理由与影响面。
 - 中文排版：`src/styles/zh.css`（字号层级/字体栈）；`src/scripts/zh-optimize.ts`（盘古之白，`spacingText` 纯函数，`PlaceholderReplacer` 保护代码片段）。
 

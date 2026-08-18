@@ -1,15 +1,13 @@
 ---
-// 覆盖移动端菜单底栏：主题切换用 Nova 风格图标按钮，与顶栏一致
+// 覆盖移动端菜单底栏：仅社交链接 + 语言选择（主题切换只在顶栏，避免重复）
 import LanguageSelect from 'virtual:starlight/components/LanguageSelect';
 import SocialIcons from 'virtual:starlight/components/SocialIcons';
-import ThemeToggle from './ThemeToggle.astro';
 ---
 
 <div class="mobile-preferences sl-flex">
 	<div class="social-icons">
 		<SocialIcons />
 	</div>
-	<ThemeToggle />
 	<LanguageSelect />
 </div>
 

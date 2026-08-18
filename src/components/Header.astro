@@ -8,7 +8,7 @@ import SiteTitle from 'virtual:starlight/components/SiteTitle'
 import SocialIcons from 'virtual:starlight/components/SocialIcons'
 import ThemeToggle from './ThemeToggle.astro'
 
-// 顶栏导航链接（直接从 Starlight 原生配置读取，不再依赖 nova user-config）
+// 顶栏导航链接（直接从 Starlight 原生配置读取，不再依赖主题 user-config）
 const nav = [
 	{ label: '首页', href: '/' },
 	{ label: '使用指南', href: '/00入站必读/01使用指南/' },
@@ -29,12 +29,14 @@ const getText = (v) => (typeof v === 'string' ? v : v?.root)
 			<Search />
 		</div>
 	</div>
-	<div class="sl-hidden md:sl-flex print:hidden right-group">
-		<div class="sl-flex social-icons">
+	<div class="sl-flex print:hidden right-group">
+		<div class="sl-hidden md:sl-flex social-icons">
 			<SocialIcons />
 		</div>
 		<ThemeToggle />
-		<LanguageSelect />
+		<div class="sl-hidden md:sl-flex">
+			<LanguageSelect />
+		</div>
 	</div>
 </div>
 
@@ -64,6 +66,22 @@ const getText = (v) => (typeof v === 'string' ? v : v?.root)
 			content: '';
 			height: 2rem;
 			border-inline-end: 1px solid var(--sl-color-gray-5);
+		}
+
+		/* 移动端：标题绝对居中、搜索右对齐。
+		   菜单按钮由 PageFrame 渲染（Starlight 默认右上角），
+		   通过 zh.css 覆盖为左上角并给 header 左侧预留空间 */
+		@media (max-width: 50rem) {
+			.title-wrapper {
+				position: absolute;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 1;
+			}
+
+			.header > :nth-child(2) {
+				margin-inline-start: auto;
+			}
 		}
 
 		@media (min-width: 50rem) {
