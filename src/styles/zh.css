@@ -36,6 +36,10 @@
 	/* 正文字号 16px（值经 var() 间接引用，防 minifier 删除，见正文区规则注释） */
 	--zh-text-body: 1rem;
 
+	/* 左右侧边栏宽度：覆盖 Starlight 默认 18.75rem（300px）→ 25rem（400px）。
+	   左侧导航栏（#starlight__sidebar）与右侧 TOC（TwoColumnContent .right-sidebar）共用此变量 */
+	--sl-sidebar-width: 25rem;
+
 	/* 行高基调：中文比英文需要更宽松 */
 	--sl-line-height: 1.7;
 	--sl-line-height-headings: 1.3;

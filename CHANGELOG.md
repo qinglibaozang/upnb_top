@@ -3,6 +3,7 @@
 ## 2026-08-19
 ### 变更
 - 侧边栏移除「首页」入口：首页是 splash 落地页（无侧边栏、顶栏已有入口），`index.mdx` frontmatter 加 `sidebar: { hidden: true }` 从侧边栏自动生成中隐藏
+- 侧边栏加宽：`:root` 定义 `--sl-sidebar-width: 25rem`（覆盖 Starlight 默认 18.75rem/300px → 400px），左侧导航栏与右侧 TOC 共用，容纳长分类名与目录标题
 
 ### 修复
 - 修复 View Transitions 切页后主题跳变：Starlight 服务端渲染固定输出 `<html data-theme="dark">`，VT 切页时 `swapRootAttributes` 会用新文档的 dark 覆盖当前主题，而 ThemeProvider 内联脚本被判定已执行不重跑，导致浅色模式点链接切页后变暗——`Head.astro` 新增 `astro:before-swap` 监听，按用户偏好（localStorage `starlight-theme`，无则跟随系统）在 swap 前修正新文档的 `data-theme`，明暗双向保持
