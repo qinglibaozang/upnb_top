@@ -637,37 +637,82 @@ body[data-mobile-menu-expanded] {
 	}
 }
 
-/* 固定底栏（Footer.astro .zh-footer-bar，吸在视口底部）预留空间：
-   正文/首页底部 padding 加大，避免文章末尾与分页导航被底栏遮挡 */
-main {
-	padding-bottom: 4.5rem; /* 底栏约 2.5rem 高 + 1.5rem 呼吸间距 */
+/* ---- 粘性页脚（sticky footer）：短页面页脚贴视口底部、长页面随内容滚动 ----
+   机制：.page 原生已是 flex column + min-height:100vh（PageFrame.astro），
+   把剩余高度沿 flex 链逐层向下传递（.main-frame → TwoColumnContent 外层 div →
+   .lg:sl-flex → .main-pane → main → 最后一个 .content-panel → .sl-container），
+   footer 用 margin-top:auto 吸收剩余空间贴底。footer 是普通文档流元素而非 fixed，
+   长页面时自然回到内容末尾随页面滚动。 */
+
+/* 层1：.main-frame 撑满 .page 剩余高度 */
+.main-frame {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+/* 层2：TwoColumnContent 外层 div（--sl-content-width 注入容器） */
+.main-frame > div {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+/* 层3：三栏 flex 容器（row）高度撑满；main-pane 靠 stretch 与容器等高 */
+.lg\:sl-flex {
+	flex: 1;
+}
+/* 移动端（<72rem）util 未定义 .lg:sl-flex（默认 block），flex 链在此断裂：
+   补成 flex column（rsc 在移动端高度为 0 不占位，DOM 顺序不变），main-pane 撑满剩余 */
+@media (max-width: 71.999rem) {
+	.lg\:sl-flex {
+		display: flex;
+		flex-direction: column;
+	}
+	.main-pane {
+		flex: 1;
+	}
+}
+/* 层4-5：main-pane → main 纵向撑满 */
+.main-pane {
+	display: flex;
+	flex-direction: column;
+}
+.main-pane > main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+/* 层6-7：最后一个 content-panel（含页脚）及其 sl-container 撑满 */
+main > .content-panel:last-child {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+main > .content-panel:last-child .sl-container {
+	/* 必须是 flex column 让 footer 用 margin-top:auto 吸底，但 flex item 的
+	   margin-inline:auto 会把宽度收缩成内容宽（正文被压成窄条）——
+	   用 width:100% 显式占满，居中交给父级，不再让 auto margin 参与收缩 */
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+/* 层8：页脚吸底（unlayered 赢过 starlight 的 .sl-container > * + * margin-top） */
+.sl-container > footer {
+	margin-top: auto;
 }
 
-/* 固定底栏本身（样式放全局而非组件 scoped，规避 @layer/scoped 组合的层叠坑；
-   选择器直接命中，unlayered 优先级最高）：
-   吸在视口底部、不随文章滚动上移，样式对齐顶部导航栏
-   （毛玻璃 blur16 + 提饱和、96% 不透明底、hairline 上边框、向上投影、100vw 防变窄） */
+/* 首页版权条：普通文档流页脚（居中、小字、顶部 hairline 分隔、上下留白），
+   不再是吸底的 fixed 条——短页面由上方 sticky footer flex 链贴到视口底部 */
 .zh-footer-bar {
-	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 2147483647 !important;
-	width: 100vw;
-	height: var(--sl-nav-height); /* 与顶部导航栏同高（3.5rem，用户要求） */
 	flex-direction: row;
 	align-items: center;
-	justify-content: center; /* 页脚信息（版权+备案）居中（用户要求） */
+	justify-content: center;
 	flex-wrap: wrap;
 	gap: 0.5rem 1.5rem;
-	padding: 0 1.25rem;
+	padding: 1.25rem;
 	font-size: var(--sl-text-xs);
 	color: var(--sl-color-gray-3);
 	border-top: 1px solid var(--zh-line);
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 96%, transparent);
-	backdrop-filter: blur(16px) saturate(1.5);
-	-webkit-backdrop-filter: blur(16px) saturate(1.5);
-	box-shadow: 0 -2px 8px var(--zh-shadow-md);
 }
 .zh-footer-bar__brand {
 	align-items: center;
@@ -680,12 +725,6 @@ main {
 }
 .zh-footer-bar a:hover {
 	color: var(--sl-color-white);
-}
-.zh-footer-bar__edit {
-	position: absolute; /* 编辑链接钉在底栏右侧，不挤占居中的页脚信息 */
-	right: 1.25rem;
-	top: 50%;
-	transform: translateY(-50%);
 }
 @media print {
 	.zh-footer-bar {

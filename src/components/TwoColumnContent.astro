@@ -62,7 +62,10 @@ const contentWidth = raw ? (PRESETS[raw] ?? raw) : undefined
 		}
 
 		:global([data-has-sidebar][data-has-toc]) .main-pane {
-			--sl-content-margin-inline: auto 0;
+			/* 内容在正文卡片内居中：原生 auto 0（margin-left:auto）在修复断裂后
+			   main-pane 变宽（延伸到右栏）时会把正文内容整体推到右侧，
+			   左侧留出大片空白，标题/文章看起来不居中 */
+			--sl-content-margin-inline: auto;
 
 			order: 1;
 			/* 正文卡片延伸到右栏卡片左缘：原生 min() 公式在宽屏下只到

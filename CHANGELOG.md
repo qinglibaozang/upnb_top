@@ -1,8 +1,13 @@
 # 更新日志
 
 ## 2026-08-20
+### 变更
+- 首页版权条改为正常文档流页脚（不再是吸在视口底部的 fixed 毛玻璃条）：改用粘性页脚（sticky footer）机制——`.page` 原生 `min-height: 100vh` + flex column，通过 `.main-frame → TwoColumnContent 外层 → .lg:sl-flex → .main-pane → main → 最后一个 .content-panel → .sl-container` 逐层 `flex: 1` 传递剩余高度，footer 用 `margin-top: auto` 吸收：短页面页脚贴视口底部、长页面页脚随内容滚动到末尾，与顶部导航栏的"钉死"逻辑彻底脱钩
+
 ### 修复
 - 修复宽屏下正文与右侧 TOC 之间的断裂空白：Starlight 原生 TwoColumnContent 宽度公式在宽屏（`--sl-content-width` 封顶，视口 ≥ ~1986px）下会把右栏占位容器 `.right-sidebar-container` 撑宽到 680px+，而 fixed 的右栏卡片仅 400px 贴视口右缘，两者错位露出约 280px 背景空白带。现改为：占位容器固定 `var(--sl-sidebar-width)`，正文 `.main-pane` 宽度改为 `calc(100% - var(--sl-sidebar-width))` 直接延伸到右栏卡片左缘；正文内容宽度仍受 `--sl-content-width` 约束，文字不随之变宽
+- 修复正文内容被压成窄条（像移动端布局）：粘性页脚把最后一个 `.content-panel` 变为 flex column 后，其 `.sl-container` 作为 flex item 且自带 `margin-inline: auto`，auto margin 会把宽度收缩成内容宽度（实测 742px → 357px），标题面板与正文面板宽度不一致。给该 `.sl-container` 显式 `width: 100%` 占满父容器，居中交给父级
+- 修复正文标题/文章靠右不居中：断裂修复后 `.main-pane` 变宽，但 `--sl-content-margin-inline` 仍为原生 `auto 0`（margin-left:auto 靠右），内容整体偏右。改为 `auto` 左右居中，实测 2560/1600/1200 下标题与正文中心偏移均为 0px
 
 ## 2026-08-19
 ### 变更
