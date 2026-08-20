@@ -1,5 +1,9 @@
 # 更新日志
 
+## 2026-08-20
+### 修复
+- 修复宽屏下正文与右侧 TOC 之间的断裂空白：Starlight 原生 TwoColumnContent 宽度公式在宽屏（`--sl-content-width` 封顶，视口 ≥ ~1986px）下会把右栏占位容器 `.right-sidebar-container` 撑宽到 680px+，而 fixed 的右栏卡片仅 400px 贴视口右缘，两者错位露出约 280px 背景空白带。现改为：占位容器固定 `var(--sl-sidebar-width)`，正文 `.main-pane` 宽度改为 `calc(100% - var(--sl-sidebar-width))` 直接延伸到右栏卡片左缘；正文内容宽度仍受 `--sl-content-width` 约束，文字不随之变宽
+
 ## 2026-08-19
 ### 变更
 - 侧边栏移除「首页」入口：首页是 splash 落地页（无侧边栏、顶栏已有入口），`index.mdx` frontmatter 加 `sidebar: { hidden: true }` 从侧边栏自动生成中隐藏

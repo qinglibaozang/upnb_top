@@ -36,12 +36,10 @@ const contentWidth = raw ? (PRESETS[raw] ?? raw) : undefined
 		.right-sidebar-container {
 			order: 2;
 			position: relative;
-			width: max(
-				var(--sl-sidebar-width),
-				calc(
-					var(--sl-sidebar-width) + (100% - var(--sl-content-width) - var(--sl-sidebar-width)) / 2
-				)
-			);
+			/* 占位固定 = 侧边栏宽：原生 max() 公式在宽屏（--sl-content-width 封顶）下
+			   会把占位容器撑宽到 680px+，而 fixed 的右栏卡片只有 400px 贴视口右缘，
+			   导致正文卡片与右栏之间露出 280px 空白带（宽屏断裂） */
+			width: var(--sl-sidebar-width);
 		}
 
 		.right-sidebar {
@@ -67,12 +65,11 @@ const contentWidth = raw ? (PRESETS[raw] ?? raw) : undefined
 			--sl-content-margin-inline: auto 0;
 
 			order: 1;
-			width: min(
-				calc(100% - var(--sl-sidebar-width)),
-				calc(
-					var(--sl-content-width) + (100% - var(--sl-content-width) - var(--sl-sidebar-width)) / 2
-				)
-			);
+			/* 正文卡片延伸到右栏卡片左缘：原生 min() 公式在宽屏下只到
+			   contentWidth + 余量/2（1480px@2560），与 fixed 右栏（贴视口右缘 400px）
+			   之间留下 280px 空白带。改为 100% - 右栏宽，卡片无缝衔接；
+			   文字宽度仍受 --sl-content-width 约束，不随之变宽 */
+			width: calc(100% - var(--sl-sidebar-width));
 		}
 	}
 </style>
