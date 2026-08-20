@@ -36,7 +36,7 @@ astro dev --background
 | `pnpm preview` | 预览生产构建产物 |
 | `npx tsc --noEmit` | 类型检查 |
 
-**已知约束**：pre-commit 钩子会运行 `tsc --noEmit`；项目存在与本次改动无关的既有类型错误（`astro.config.mjs` 隐式 any、node_modules 内 starlight 类型），提交被拦截时判断是否本次改动引入，无关则经用户同意用 `--no-verify`。
+**已知约束**：pre-commit 钩子会运行 `tsc --noEmit`；项目存在与本次改动无关的既有类型错误（`astro.config.mjs` 隐式 any、node_modules 内 starlight 类型），提交时统一用 `--no-verify` 绕过（用户已确认，见 Git 规范）。
 
 ### 技术栈与版本策略
 
@@ -62,7 +62,8 @@ astro dev --background
 - 不自动 `git commit` / `git push`——除非用户明确要求。
 - 用户要求提交时：先 `git diff` 复核全部改动，确认无遗漏、无无关文件；提交信息用约定格式（`feat:` / `fix:` / `docs:` / `chore:` 前缀 + 中文描述），一次提交一个逻辑变更。
 - 不删除用户未要求删除的文件；误建垃圾文件（如 Windows 的 `nul`）删除前向用户说明。
-- 提交被 pre-commit 钩子（tsc）拦截时：先判断错误是否与本次改动相关；无关的既有错误向用户说明后，经用户同意再用 `--no-verify`，不擅自绕过。
+- 临时调试文件默认不提交：`.tmp-*` 前缀的一次性产物（诊断脚本如 `.tmp-diag*.mjs`、浏览器调试 profile 如 `.tmp-edge-profile*/`）一律不 `git add`，调试完成后删除；反复产生时把 `.tmp-*` 加入 `.gitignore` 防再出现。
+- 提交统一使用 `git commit --no-verify`：pre-commit 钩子的 `tsc` 存在与改动无关的既有类型错误（`astro.config.mjs` 隐式 any、node_modules 内 starlight 类型），用户已确认**总是直接绕过**，无需再询问。
 
 ### 安全规范
 
