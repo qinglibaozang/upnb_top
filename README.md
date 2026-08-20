@@ -46,7 +46,6 @@ pnpm preview
 ---
 title: 文章标题
 description: 文章摘要（可选）
-date: 2026-01-01
 contentWidth: wide # 正文宽度：wide / full / 或 CSS 长度如 900px；删掉用默认
 ---
 文章正文……
@@ -57,13 +56,16 @@ contentWidth: wide # 正文宽度：wide / full / 或 CSS 长度如 900px；删�
 ## 目录结构
 
 ```
-public/                    # 静态资源（favicon、logo）
+public/                    # 静态资源（favicon、logo、images）
+serve-preview.mjs          # 本地静态预览服务器（pnpm preview:local）
 src/
-├── assets/                # 站内图片
-├── components/            # 自定义组件（Header、TwoColumnContent）
+├── assets/                # 站内图片（logo 等）
+├── components/            # 自定义组件覆盖（Header、TwoColumnContent、Head、Search 等 8 个）
+├── content.config.ts      # 内容集合 schema（contentWidth + jieba 搜索分词）
 ├── content/docs/          # 站点内容（按文件夹分类）
-├── scripts/               # 构建期脚本（中文排版优化）
-└── styles/                # 样式（zh.css 中文排版体系）
+├── scripts/               # 客户端脚本（zh-optimize.ts 中文排版优化等）
+├── styles/                # 样式（zh.css 中文排版体系、pagefind-ui.css 搜索样式）
+└── vendor/                # 本地化第三方文件（pagefind-ui-core.mjs）
 astro.config.mjs           # 站点配置
 ```
 

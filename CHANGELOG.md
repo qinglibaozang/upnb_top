@@ -2,6 +2,7 @@
 
 ## 2026-08-20
 ### 变更
+- agents/ 文档体系与项目实际进度同步（9 个文件）：AGENTS.md 按需读取表补全 12 个 agents 文件、修正 `content.config.ts` 已存在；技术栈.md 更新字号层级（正文 16px）与 sidebar-topics 已禁用状态、补 jieba 搜索；项目结构.md/文件索引.md 补 8 个覆盖组件与新文件；数据结构.md 补 `searchKeywords` 字段；常用命令.md/Git规范.md 更新为提交统一 `--no-verify` + 临时文件规则；README 结构图与 frontmatter 示例修正
 - AGENTS.md Git 规范更新：提交统一使用 `--no-verify` 绕过 pre-commit 钩子（tsc 既有类型错误与改动无关，用户确认总是直接绕过，无需再询问）
 - AGENTS.md Git 规范新增：临时调试文件（`.tmp-*` 前缀的诊断脚本、浏览器调试 profile）默认不提交，调试完成后删除；反复产生时加入 `.gitignore`
 ### 修复

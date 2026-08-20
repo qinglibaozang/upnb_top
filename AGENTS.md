@@ -91,7 +91,7 @@ astro dev --background
 - 包管理必须用 `pnpm`（pnpm workspace，根目录有 `pnpm-lock.yaml`）。**禁止 `npm install`**——会触发 arborist 崩溃 bug（`Link.matches` 空引用）。
 - 新增依赖（`pnpm add`）前，必须先说明装什么、为什么装、影响面，经用户确认后执行；不擅自装包。
 - 内容文件放 `src/content/docs/`，沿用现有分类目录（`00.入站必读`、`01.中小学资源`、`03.AI专区`、`index.mdx`）；站点内容默认中文。
-- 注意：`README.md` 的项目结构图已过时（其中 `src/content.config.ts` 实际不存在），以 `src/content/` 实际目录为准，不被 README 误导。
+- 注意：`README.md` 的项目结构图不全（缺 `src/content.config.ts`、`src/vendor/`、`pagefind-ui.css`），以 `src/content/` 实际目录为准。
 
 ### 变更日志（CHANGELOG.md）
 
@@ -100,7 +100,7 @@ astro dev --background
 
 ## 事实型规则（按需读取）
 
-下表文件**不会被自动内联**，涉及对应任务时**主动 read 原文**：
+下表文件**不会被自动内联**，涉及对应任务时**主动 read 原文**。其中 8 个文件（常用命令/技术栈/项目约定/安全规范/Git规范/测试/代码风格/工作流程）的内容已精炼内联到上方"方法型规则"，此处的完整版作为**细节补充与历史参考**；发生冲突时以本文件内联版为准：
 
 | 文件 | 何时读 |
 |---|---|
@@ -109,6 +109,13 @@ astro dev --background
 | `agents/数据结构.md` | **新增/修改页面数据结构（frontmatter、卡片、自定义页面）必须先读此文件再设计，并登记字段** |
 | `agents/变更日志.md` | 需要 CHANGELOG 格式细节时 |
 | `agents/工作流程.md` | 需要完整提问模板、任务分级、spec 细节时 |
+| `agents/常用命令.md` | 需要命令细节与已知约束时 |
+| `agents/技术栈.md` | 涉及依赖/框架/排版体系细节时 |
+| `agents/项目约定.md` | 需要包管理/内容存放细节时 |
+| `agents/安全规范.md` | 涉及敏感信息/破坏性操作时 |
+| `agents/Git规范.md` | 需要 Git 提交细节时 |
+| `agents/测试.md` | 需要测试/验证细节时 |
+| `agents/代码风格.md` | 需要代码风格细节时 |
 
 ## 边界（红线，必须遵守）
 
