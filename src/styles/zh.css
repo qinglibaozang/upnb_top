@@ -90,6 +90,28 @@
 	line-height: 1.75rem;
 }
 
+/* 标题锚点图标（悬浮锁链）与自定义标题字号对齐：
+   官方 .sl-heading-wrapper 的 font-size 用 --sl-text-h2/h3（29px/24px），
+   锚点图标按 0.8275em 相对它渲染；我们已把 h2/h3 缩小为 24px/20px，
+   但 wrapper 未同步 → 图标仍按官方基准算，大小与标题不符且按官方行高
+   1.2 垂直居中（实际行高 2rem/1.75rem），导致对不齐。
+   修复：wrapper 字号同步为我们的标题字号（图标 0.8275em 随标题缩放），
+   图标垂直居中 translateY 的基准由官方 1.2em 改为实际行高
+   （官方公式：translateY((行高×1em − 图标大小)/2)，行内盒高 = line-height）。
+   保留官方 vertical-align: top + translateY 结构（实测中心偏差 < 0.1px）。 */
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+	font-size: 1.5rem; /* 与 h2 一致：锚点图标 0.8275em ≈ 19.9px */
+}
+.sl-markdown-content .sl-heading-wrapper.level-h3 {
+	font-size: 1.25rem; /* 与 h3 一致：锚点图标 0.8275em ≈ 16.6px */
+}
+.sl-markdown-content .sl-heading-wrapper.level-h2 .sl-anchor-icon > svg {
+	transform: translateY(calc((2rem - var(--sl-anchor-icon-size)) / 2));
+}
+.sl-markdown-content .sl-heading-wrapper.level-h3 .sl-anchor-icon > svg {
+	transform: translateY(calc((1.75rem - var(--sl-anchor-icon-size)) / 2));
+}
+
 /* 表格：13px + 圆角 + 分隔线 + 投影 */
 .sl-markdown-content table {
 	width: 100%;

@@ -4,6 +4,8 @@
 ### 变更
 - AGENTS.md Git 规范更新：提交统一使用 `--no-verify` 绕过 pre-commit 钩子（tsc 既有类型错误与改动无关，用户确认总是直接绕过，无需再询问）
 - AGENTS.md Git 规范新增：临时调试文件（`.tmp-*` 前缀的诊断脚本、浏览器调试 profile）默认不提交，调试完成后删除；反复产生时加入 `.gitignore`
+### 修复
+- 修复 h2/h3 标题锚点图标与自定义字号不对齐：官方 `.sl-heading-wrapper` 字号用 `--sl-text-h2/h3`（29px/24px），锚点图标按 0.8275em 相对它渲染，而本站标题已缩为 24px/20px → wrapper 字号同步为 1.5rem/1.25rem，图标 translateY 居中基准改为实际行高（2rem/1.75rem），实测中心偏差 < 0.1px
 
 ## 2026-08-19
 ### 新增
