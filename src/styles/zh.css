@@ -1207,16 +1207,11 @@ html[data-has-hero] .hero .actions a svg {
    （面包屑导航已删除：PageTitle.astro 组件同步移除，此处样式一并清理）
  */
 
-/* 标题面板与正文面板之间的分割线：改为画在正文内容容器（.sl-container）顶部，
-   而非正文面板（.content-panel）顶部——面板宽度含内边距（padding 1.5rem），
-   线会全长超出正文宽度；容器受 --sl-content-width（contentWidth 前注）约束，
-   线宽与正文一致 */
+/* 标题面板与正文面板之间的分割线已移除（用户反馈标题下方分割线多余）。
+   原方案：画在正文内容容器（.sl-container）顶部、受 --sl-content-width 约束。
+   保留面板层 border-top:none 防御 Starlight 默认边框 */
 .content-panel + .content-panel {
 	border-top: none;
-}
-
-.content-panel + .content-panel .sl-container {
-	border-top: 1px solid var(--sl-color-hairline);
 }
 
 /* 文章页 H1 精修：品牌蓝渐变文字
