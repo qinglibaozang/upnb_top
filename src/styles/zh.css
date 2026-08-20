@@ -446,26 +446,6 @@ mobile-starlight-toc a[aria-current='true'] {
 }
 
 /* ── 6. 辅助细节 ──────────────────────────────────────────── */
-/* sidebar 分类选中态：保留官方 hover/selected 行为（accent-high 文字 + 图标反色），
-   只覆盖 border-radius 和 transition（官方无此动画） */
-.starlight-sidebar-topics a {
-	border-radius: 0.5rem;
-	transition:
-		background-color 0.15s ease,
-		color 0.15s ease;
-}
-
-.zh-nav-title {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 1;
-}
-
-/* 顶部导航右侧工具区：推至最右（替代缺失的 Tailwind ml-auto） */
-.zh-nav-right {
-	margin-left: auto;
-}
 
 /* 顶栏搜索框拉长：桌面固定 400px（用户指定）。
    布局真相：桌面 <nav class="flex-1"> 已吃掉 header 全部剩余空间，
@@ -489,31 +469,12 @@ mobile-starlight-toc a[aria-current='true'] {
 	}
 }
 
-@media (min-width: 48rem) {
-	.zh-nav-title {
-		position: static;
-		left: auto;
-		transform: none;
-		z-index: auto;
-	}
-}
-
 /* 顶部导航站点 logo：圆形蒙版 */
 .site-title img {
 	border-radius: 50%;
 	object-fit: cover;
 	height: 2rem;
 	width: 2rem;
-}
-
-/* 侧边栏分类分隔线：全站统一线色（黑底侧边栏上也清晰可见） */
-.starlight-sidebar-topics::after {
-	height: 1px;
-	margin-top: 1rem;
-	margin-bottom: 1rem;
-	border-top: none;
-	background: var(--zh-line);
-	box-shadow: 0 2px 8px var(--zh-shadow-md);
 }
 
 /* 全角标点与汉字之间的视觉间距（由脚本包裹 span，不改文本内容）
@@ -720,6 +681,17 @@ main > .content-panel:last-child .sl-container {
 }
 .zh-footer-bar a:hover {
 	color: var(--sl-color-accent); /* 方案 A：统一变强调蓝 */
+}
+/* 页脚「由 Astro+Starlight 构建」：与页脚同字号色系（首页继承 .zh-footer-bar），
+   非首页页脚（Pagination 后）居中显示 */
+.zh-built-with {
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+	text-decoration: none;
+	text-align: center;
+}
+.zh-built-with:hover {
+	color: var(--sl-color-accent);
 }
 @media print {
 	.zh-footer-bar {
@@ -1373,7 +1345,3 @@ mobile-starlight-toc .dropdown ul ul {
 		0 0 0 1px var(--sl-color-accent),
 		0 12px 28px var(--zh-shadow-md);
 }
-
-
-
-

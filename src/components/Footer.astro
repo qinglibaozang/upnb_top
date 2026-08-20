@@ -4,8 +4,6 @@
 import EditLink from 'virtual:starlight/components/EditLink';
 import LastUpdated from 'virtual:starlight/components/LastUpdated';
 import Pagination from 'virtual:starlight/components/Pagination';
-import config from 'virtual:starlight/user-config';
-import { Icon } from '@astrojs/starlight/components';
 
 // 首页判断：用 request URL
 const reqUrl = new URL(Astro.request.url);
@@ -20,6 +18,9 @@ const isHomepage = reqUrl.pathname === '/' || reqUrl.pathname === '/index.html';
 				吉ICP备2022006636号-1
 			</a>
 		</div>
+		<a class="zh-built-with" href="https://starlight.astro.build" target="_blank" rel="noopener noreferrer">
+			由 Astro+Starlight 构建
+		</a>
 	</footer>
 ) : (
 	<footer class="sl-flex">
@@ -28,12 +29,9 @@ const isHomepage = reqUrl.pathname === '/' || reqUrl.pathname === '/index.html';
 			<LastUpdated />
 		</div>
 		<Pagination />
-
-		{config.credits && (
-			<a class="kudos sl-flex" href="https://starlight.astro.build">
-				<Icon name="starlight" /> {Astro.locals.t('builtWithStarlight.label')}
-			</a>
-		)}
+		<a class="zh-built-with" href="https://starlight.astro.build" target="_blank" rel="noopener noreferrer">
+			由 Astro+Starlight 构建
+		</a>
 	</footer>
 )}
 
@@ -53,24 +51,6 @@ const isHomepage = reqUrl.pathname === '/' || reqUrl.pathname === '/index.html';
 		}
 		.meta > :global(p:only-child) {
 			margin-inline-start: auto;
-		}
-
-		.kudos {
-			align-items: center;
-			gap: 0.5em;
-			margin: 1.5rem auto;
-			font-size: var(--sl-text-xs);
-			text-decoration: none;
-			color: var(--sl-color-gray-3);
-		}
-		.kudos:hover {
-			color: var(--sl-color-white);
-		}
-	}
-
-	@layer starlight.components {
-		.kudos :global(svg) {
-			color: var(--sl-color-orange);
 		}
 	}
 </style>

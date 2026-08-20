@@ -494,50 +494,11 @@ function init() {
 	for (const el of targets) walk(el as HTMLElement);
 	initBackTop();
 	removeTocOverview();
-	initMobileMenuKeep();
 	stripSidebarNumberPrefixes();
 	applySearchHighlight();
 }
 
 let backTopCleanup: (() => void) | null = null;
-
-/** 移动端：点击分类不关菜单（跳转后自动重新展开，便于继续选文章） */
-function initMobileMenuKeep() {
-	const isMobile = () => window.matchMedia('(max-width: 47.999rem)').matches;
-
-	// 点击分类链接（sidebar-topics）→ 记录标记。
-	// 监听器只注册一次（模块级标志），避免 VT 多次导航后重复注册累积。
-	if (!menuListenerRegistered) {
-		menuListenerRegistered = true;
-		document.addEventListener(
-			'click',
-			(e) => {
-				const target = e.target as HTMLElement;
-				const link = target.closest?.('.starlight-sidebar-topics a') as HTMLAnchorElement | null;
-				if (link && isMobile()) {
-					sessionStorage.setItem('zh-expand-menu', '1');
-				}
-			},
-			false,
-		);
-	}
-
-	// 新页面加载：如有标记则自动展开移动菜单（文章链接不会设置标记，正常关闭）
-	// 用 window load 确保菜单组件初始化完成，避免其初始化时重置 body 属性
-	if (sessionStorage.getItem('zh-expand-menu') === '1') {
-		sessionStorage.removeItem('zh-expand-menu');
-		if (isMobile()) {
-			const expand = () => document.body.setAttribute('data-mobile-menu-expanded', '');
-			if (document.readyState === 'complete') {
-				expand();
-			} else {
-				window.addEventListener('load', expand);
-			}
-		}
-	}
-}
-
-let menuListenerRegistered = false;
 
 /** 移除 TOC 中的「概述」项（直接删 DOM，不依赖 CSS 选择器兼容性） */
 function removeTocOverview() {

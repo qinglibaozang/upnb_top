@@ -6,6 +6,8 @@
 - AGENTS.md Git 规范更新：提交统一使用 `--no-verify` 绕过 pre-commit 钩子（tsc 既有类型错误与改动无关，用户确认总是直接绕过，无需再询问）
 - AGENTS.md Git 规范新增：临时调试文件（`.tmp-*` 前缀的诊断脚本、浏览器调试 profile）默认不提交，调试完成后删除；反复产生时加入 `.gitignore`
 - 文章页标题下方分割线移除：原画在正文内容容器（`.content-panel + .content-panel .sl-container`）顶部的 1px hairline 线删除（用户反馈多余）
+- 首发性能优化：jieba 中文分词从「打开页面即预取 3.8MB」改为「首次打开搜索框时才真正加载」（Search.astro `connectedCallback` 移除 `preloadJieba`，`openModal` 触发懒加载）；`prefetchAll` 改为默认 `viewport` 策略（仅预取视口内链接）；站点 logo 从 940×940 JPG 89KB 压缩为 64×64 WebP 2.2KB，astro.config 引用同步更新
+- 彻底移除 sidebar-topics 功能（`starlightSidebarTopics` 插件调用 + JS/CSS/依赖/文档引用全清：Header 删除死代码 `nav`/`getText`/`hasSidebar`；Footer 删除死分支 kudos；`zh-optimize.ts` 删除只服务 topics 的 `initMobileMenuKeep`；`package.json` 移除 `starlight-sidebar-topics` 依赖；`04.测试专题` 文档更新失效说明）
 ### 修复
 - 修复 h2/h3 标题锚点图标与自定义字号不对齐：官方 `.sl-heading-wrapper` 字号用 `--sl-text-h2/h3`（29px/24px），锚点图标按 0.8275em 相对它渲染，而本站标题已缩为 24px/20px → wrapper 字号同步为 1.5rem/1.25rem，图标 translateY 居中基准改为实际行高（2rem/1.75rem），实测中心偏差 < 0.1px
 

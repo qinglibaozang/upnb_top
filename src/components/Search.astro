@@ -125,6 +125,9 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 				this.querySelector('input')?.focus();
 				event?.stopPropagation();
 				window.addEventListener('click', onClick);
+				// jieba-wasm（~3.8MB）真正懒加载：仅在用户首次打开搜索框时预取，
+				// 避免打开任意页面就后台下载（此前 connectedCallback 预取导致首屏流量浪费）
+				preloadJieba().catch(() => {});
 			};
 
 			const closeModal = () => dialog.close();
@@ -182,9 +185,6 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 		connectedCallback() {
 			this.showShortcut();
 			this.initPagefind();
-			// 后台预取 jieba-wasm（~3.8MB）：保证用户首次输入时查询端分词已就绪，
-			// 失败静默——未就绪时 processTerm 原样返回，搜索功能不受影响
-			preloadJieba().catch(() => {});
 		}
 
 		/**

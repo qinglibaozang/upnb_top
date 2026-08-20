@@ -1,23 +1,11 @@
 ---
 // 覆盖 starlight 默认 Header：移动端布局重排
-const { hasSidebar } = Astro.locals.starlightRoute
 
 import LanguageSelect from 'virtual:starlight/components/LanguageSelect'
 import Search from 'virtual:starlight/components/Search'
 import SiteTitle from 'virtual:starlight/components/SiteTitle'
 import SocialIcons from 'virtual:starlight/components/SocialIcons'
 import ThemeToggle from './ThemeToggle.astro'
-
-// 顶栏导航链接（直接从 Starlight 原生配置读取，不再依赖主题 user-config）
-const nav = [
-	{ label: '首页', href: '/' },
-	{ label: '使用指南', href: '/00入站必读/01使用指南/' },
-]
-
-// 处理 nav 的国际化（单语言站点配置全是纯字符串，直接取字符串即可；
-// 兼容 i18n 对象时取 root 键。注：此前实现引用了不存在的 route.currentLocale
-// （恒 undefined 走 root）且 ?? v?.root 是同一键的两次访问——均已简化）
-const getText = (v) => (typeof v === 'string' ? v : v?.root)
 ---
 
 <div class="header">
