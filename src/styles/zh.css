@@ -195,31 +195,43 @@
 	   这里用与选中态同款的 var() 间接写法覆盖为 400（直接写 400 会被 minifier 删除）；
 	   分组内链接（无 .large 类）也一并统一 */
 	font-weight: var(--zh-fw-sidebar-active);
-	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
+	line-height: 1.7; /* 方案 C：左侧边栏行高 1.7（≈27px） */
 	height: auto;
-	padding: 0.1875rem 0.5rem; /* 紧凑点击热区，无胶囊底 */
-	border-radius: 0;
+	padding: 0.125rem 0.5rem; /* 2px 上下：紧凑点击热区，无胶囊底（方案 C） */
+	border-radius: 0.25rem; /* 官方倒角（Starlight a { border-radius: 0.25rem }），hover/选中色块圆角 */
 	transition: color 0.15s ease;
 }
 
-/* 链接悬停：VS Code 风格——淡背景行，文字不变色 */
-.sidebar-content a.large:hover,
-.sidebar-content :is(ul.top-level, details ul) li > a:hover {
+/* 链接悬停：方案 A 同款——淡背景行 + 文字变强调蓝 + 1px accent 光圈
+   （与分页卡片 hover 一致：box-shadow 0 0 0 1px accent + 文字 accent）
+   margin-block 2px：相邻链接行距 31.2px 完全贴紧，hover 光圈（外扩 1px）会
+   与上下链接边缘重叠，加 2px 垂直 margin 让光圈之间有 2px 空隙不叠边。
+   :not([aria-current]) 排除选中项——否则此规则（特异性 0,2,3）会把
+   选中项 hover 的文字也覆盖成亮蓝，导致亮蓝文字 on 亮蓝背景看不见 */
+.sidebar-content a.large:hover:not([aria-current]),
+.sidebar-content :is(ul.top-level, details ul) li > a:hover:not([aria-current]) {
 	background-color: color-mix(in srgb, var(--sl-color-gray-5) 18%, transparent);
+	color: var(--sl-color-accent);
+	box-shadow: 0 0 0 1px var(--sl-color-accent);
+}
+.sidebar-content a.large,
+.sidebar-content :is(ul.top-level, details ul) li > a {
+	margin-block: 0.1875rem; /* 3px：hover 光圈留空隙（见上注释） */
+}
+/* 选中项 hover 保持官方 accent-high 背景 + 深色文字：
+   否则深蓝文字（accent-low）on 深色背景看不见 */
+.sidebar-content a[aria-current='page']:hover {
+	background-color: var(--sl-color-text-accent) !important;
+	color: var(--sl-color-text-invert) !important;
 }
 
-/* 文章标题选中：VS Code 风格——整行高亮块（淡色圆角底 + 品牌蓝字，不加粗）。
-   注意：font-weight 必须用 var() 间接写法（--zh-fw-sidebar-active: 400），
-   直接写 font-weight:400（=初始值）会被 CSS minifier 当冗余删除，删掉后
-   回落为 starlight 默认 @layer starlight.core 的 [aria-current='page'] 600；
-   var() 无法被 minifier 推断，可稳定保留 */
+/* 左侧边栏选中态：还原 Starlight 官方样式（font-weight 600 + accent-high 背景 + accent-low 文字）。
+   !important 必须——unlayered 链接规则 li > a 的特异性 (0,2,3) 高于此规则 (0,2,1)，
+   必须用 !important 覆盖回 600（Starlight 官方 [aria-current='page'] 600） */
 .sidebar-content a[aria-current='page'],
 .sidebar-content a[aria-current='page']:hover,
 .sidebar-content a[aria-current='page']:focus {
-	font-weight: var(--zh-fw-sidebar-active);
-	color: var(--zh-article-active-text);
-	background-color: var(--zh-article-active-bg);
-	border-radius: 0.375rem;
+	font-weight: 600 !important;
 }
 
 /* 侧边栏分组标题：VitePress 规格（13px 700 大写 + 0.4px 字距，灰色），
@@ -230,7 +242,7 @@
 	letter-spacing: 0.4px;
 	color: var(--sl-color-gray-3);
 	text-transform: uppercase; /* 中文无影响；英文分组名呈小标签风格 */
-	line-height: 2; /* 行高统一 2（用户要求：左右边栏一致） */
+	line-height: 1.7; /* 方案 C：与链接行高统一（左右侧边栏同一风格） */
 }
 
 /* ── 4b. VS Code 风格文件树（Explorer） ────────────────────
@@ -362,7 +374,7 @@ starlight-toc a:hover {
 
 /* 当前项：品牌蓝文字（滚动定位更新 aria-current 时随动变色） */
 starlight-toc a[aria-current='true'] {
-	color: var(--zh-article-active-text);
+	color: var(--sl-color-text-accent);
 	background-color: transparent;
 	border-radius: 0;
 	transition: color 0.25s;
@@ -388,7 +400,7 @@ starlight-toc li:has(> a[aria-current='true'])::before {
 	transform: translateY(-50%);
 	width: 2px;
 	height: 1.125rem;
-	background-color: var(--zh-article-active-text);
+	background-color: var(--sl-color-text-accent);
 	border-radius: 2px;
 }
 
@@ -407,13 +419,13 @@ mobile-starlight-toc a:hover {
 	transition: color 0.25s;
 }
 mobile-starlight-toc a[aria-current='true'] {
-	color: var(--zh-article-active-text); /* 当前项：品牌蓝（同步桌面端，用户要求） */
+	color: var(--sl-color-text-accent); /* 当前项：品牌蓝（同步桌面端，用户要求） */
 	transition: color 0.25s;
 }
 
 /* ── 6. 辅助细节 ──────────────────────────────────────────── */
-/* sidebar 分类选中态：整行高亮胶囊
-   悬停 → 仅淡红背景，文字不变色；选中 → 正红实底 + 白字 */
+/* sidebar 分类选中态：保留官方 hover/selected 行为（accent-high 文字 + 图标反色），
+   只覆盖 border-radius 和 transition（官方无此动画） */
 .starlight-sidebar-topics a {
 	border-radius: 0.5rem;
 	transition:
@@ -421,30 +433,6 @@ mobile-starlight-toc a[aria-current='true'] {
 		color 0.15s ease;
 }
 
-.starlight-sidebar-topics a:hover,
-.starlight-sidebar-topics a:focus-visible {
-	background: var(--zh-article-active-bg);
-}
-
-.starlight-sidebar-topics a.starlight-sidebar-topics-current {
-	background: transparent;
-	color: var(--zh-article-active-text);
-}
-
-/* 选中：图标方块反色（正蓝底 + 白图标），与文章标题选中同色系 */
-.starlight-sidebar-topics a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
-	background: var(--zh-article-active-text);
-	border-color: var(--zh-article-active-text);
-	color: #fff;
-}
-
-/* hover 图标保持原色 */
-.starlight-sidebar-topics a:hover .starlight-sidebar-topics-icon,
-.starlight-sidebar-topics a:focus-visible .starlight-sidebar-topics-icon {
-	background: transparent;
-	border-color: var(--sl-color-gray-4);
-	color: inherit;
-}
 .zh-nav-title {
 	position: absolute;
 	left: 50%;
@@ -524,40 +512,25 @@ mobile-starlight-toc a[aria-current='true'] {
    所有线统一用 gray-4：明主题白底上是深灰（黑线），暗主题黑底上是浅灰（白线），
    且在深色侧边栏背景上始终可见——全站线条完全一致 */
 :root {
-	/* ============ 品牌主色：商务蓝（全站唯一 accent） ============
-	   参考：华为云 / 腾讯云 / 阿里云文档站的单一强调色体系。
-	   所有选中态、链接、按钮、进度环、代码高亮统一走这一个色系，
-	   不再出现红蓝混用的"双 accent"（改版前分类选中为红、文章选中为蓝）。 */
-	--zh-brand: hsl(217, 88%, 55%); /* 品牌蓝（中明度，亮暗通用） */
-	--zh-brand-strong: hsl(217, 85%, 40%); /* 深蓝（亮色模式文字用） */
-	--zh-brand-glow: hsla(217, 88%, 55%, 0.14); /* 蓝色辉光（hover/软底色） */
-
-	/* Starlight accent 三件套统一为品牌蓝（此处为暗色默认值） */
-	--sl-color-accent: hsl(217, 88%, 62%);
-	--sl-color-accent-high: hsl(217, 90%, 85%);
-	--sl-color-accent-low: hsl(217, 50%, 24%);
+	/* ============ 品牌主色 ============
+	   使用 Starlight 官方 accent 体系，不覆盖 --sl-color-accent，直接用官方值。
+	   所有选中态、链接、按钮统一走 Starlight 默认强调色。 */
+	/* accent 三件套不覆盖，直接用 Starlight 官方默认值（暗色 hsl(224,100%,60%) / 亮色 hsl(234,90%,60%)） */
 
 	--zh-line: var(--sl-color-gray-4); /* 全站统一线色 */
 	/* 正文内容宽度：随视口自适应（大屏更宽，中小屏保持舒适） */
 	--sl-content-width: clamp(50rem, 58vw, 72rem);
-	--zh-article-active-text: hsl(217, 90%, 70%); /* 文章选中文字：亮蓝（暗色） */
-	--zh-article-active-bg: hsla(217, 88%, 60%, 0.16);
 	--zh-shadow-sm: rgba(255, 255, 255, 0.08);
 	--zh-shadow-md: rgba(255, 255, 255, 0.12);
-	--zh-accent-soft: hsla(217, 88%, 60%, 0.13);
+	--zh-accent-soft: color-mix(in srgb, var(--sl-color-accent) 13%, transparent); /* 用官方 accent 计算软底色 */
 }
 
 :root[data-theme='light'] {
-	/* 亮色模式：accent 三件套换为可读性更稳的深蓝/浅蓝 */
-	--sl-color-accent: hsl(217, 88%, 52%);
-	--sl-color-accent-high: hsl(217, 80%, 38%);
-	--sl-color-accent-low: hsl(217, 88%, 93%);
+	/* accent 三件套不覆盖，直接用 Starlight 官方默认值（亮色 hsl(234,90%,60%)） */
 
-	--zh-article-active-text: hsl(217, 85%, 42%); /* 文章选中：品牌深蓝（明色模式） */
-	--zh-article-active-bg: hsla(217, 88%, 52%, 0.1);
 	--zh-shadow-sm: rgba(15, 20, 34, 0.15);
 	--zh-shadow-md: rgba(15, 20, 34, 0.25);
-	--zh-accent-soft: hsla(217, 88%, 52%, 0.1);
+	--zh-accent-soft: color-mix(in srgb, var(--sl-color-accent) 10%, transparent);
 
 	/* 提示框（aside）语义色：亮色主题低饱和版（商务克制） */
 	--zh-tip: hsl(160, 60%, 38%);
@@ -724,7 +697,7 @@ main > .content-panel:last-child .sl-container {
 	text-decoration: none;
 }
 .zh-footer-bar a:hover {
-	color: var(--sl-color-white);
+	color: var(--sl-color-accent); /* 方案 A：统一变强调蓝 */
 }
 @media print {
 	.zh-footer-bar {
@@ -1146,8 +1119,8 @@ html[data-has-hero] .hero .actions a:hover,
 html[data-has-hero] .hero .actions a:focus-visible {
 	transform: translateY(-2px);
 	box-shadow:
-		0 0 20px var(--zh-brand-glow),
-		0 0 40px var(--zh-brand-glow),
+		0 0 20px var(--sl-color-accent),
+		0 0 40px var(--sl-color-accent),
 		0 8px 24px var(--zh-shadow-md);
 }
 
@@ -1180,21 +1153,21 @@ html[data-has-hero] .hero .actions a:focus-visible {
    第二个按钮保持渐变描边玻璃胶囊（选择器：actions 下第一个 span 内的 a，
    注意 a 不是 actions 的直接子元素，不能用 a:first-child） */
 html[data-has-hero] .hero .actions > span:first-child a {
-	background: linear-gradient(135deg, hsl(217, 88%, 55%), hsl(217, 88%, 48%));
+	background: linear-gradient(135deg, var(--sl-color-accent), var(--sl-color-accent-low));
 	color: #fff;
 	border: 1px solid transparent;
 	box-shadow:
-		0 0 20px var(--zh-brand-glow),
+		0 0 20px var(--sl-color-accent),
 		0 4px 16px var(--zh-shadow-md);
 }
 
 html[data-has-hero] .hero .actions > span:first-child a:hover,
 html[data-has-hero] .hero .actions > span:first-child a:focus-visible {
 	transform: translateY(-2px);
-	background: linear-gradient(135deg, hsl(217, 88%, 60%), hsl(217, 88%, 52%));
+	background: linear-gradient(135deg, var(--sl-color-accent-high), var(--sl-color-accent));
 	box-shadow:
-		0 0 28px var(--zh-brand-glow),
-		0 0 48px var(--zh-brand-glow),
+		0 0 28px var(--sl-color-accent),
+		0 0 48px var(--sl-color-accent),
 		0 8px 24px var(--zh-shadow-md);
 }
 
@@ -1229,10 +1202,10 @@ html[data-has-hero] .hero .actions a svg {
     fallback：不支持 background-clip:text 时退化为纯品牌色文字。
     底部 hairline 分隔线已移除——用户反馈标题与描述之间的分割线多余） */
 html:not([data-has-hero]) [data-page-title] {
-	background: linear-gradient(120deg, var(--zh-brand), hsl(217, 88%, 68%));
+	background: linear-gradient(120deg, var(--sl-color-accent), var(--sl-color-accent-high));
 	-webkit-background-clip: text;
 	background-clip: text;
-	color: var(--zh-brand-strong); /* fallback 底色，clip 生效时被透明覆盖 */
+	color: var(--sl-color-accent-low); /* fallback 底色，clip 生效时被透明覆盖 */
 	-webkit-text-fill-color: transparent; /* Safari 渐变文字 */
 }
 
@@ -1297,7 +1270,7 @@ mark.zh-search-hl {
 }
 .zh-mobile-dock__item:hover,
 .zh-mobile-dock__item:active {
-	color: var(--sl-color-white);
+	color: var(--sl-color-accent); /* 方案 A：统一变强调蓝 */
 }
 @media (max-width: 49.999rem) {
 	.zh-mobile-dock {
@@ -1323,6 +1296,65 @@ mobile-starlight-toc .dropdown a {
 }
 mobile-starlight-toc .dropdown ul ul {
 	margin-inline-start: 1rem;
+}
+
+/* ── 上一页/下一页 分页导航：方案 A（强调色卡片） ──────────────
+   与预览页 pagination-preview.html 方案 A 一致，改用官方 token：
+   - 标题 16px（= 全局正文），小标签 12px，图标 18px（用户嫌官方 2xl 太大）
+   - 卡片紧凑（0.6rem 内边距），hover 时边框 + 标题 + 箭头变强调蓝 */
+.pagination-links {
+	gap: 0.75rem;
+}
+.pagination-links a {
+	border-radius: 0.6rem;
+	padding: 0.6rem 0.75rem;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pagination-links a:hover {
+	border-color: var(--sl-color-accent);
+	box-shadow: 0 0 0 1px var(--sl-color-accent), var(--sl-shadow-md);
+}
+.pagination-links .link-title {
+	font-size: 1rem; /* 16px，与全局正文一致（官方 --sl-text-2xl=24px 过大） */
+	line-height: 1.4;
+	color: var(--sl-color-gray-1);
+}
+.pagination-links a:hover .link-title {
+	color: var(--sl-color-accent);
+}
+/* 外层 span 包 label 文本 + link-title，先统一 12px 再让 link-title 覆盖为 16px */
+.pagination-links a > span {
+	font-size: 0.75rem;
+}
+.pagination-links a:hover {
+	color: var(--sl-color-gray-2);
+}
+.pagination-links a:hover svg {
+	color: var(--sl-color-accent);
+}
+.pagination-links svg {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	transition: color 0.2s ease;
+}
+
+/* ── 全站 hover 统一方案 A（强调蓝） ──────────────────────────
+   方案 A 语义：hover 时视觉元素变 --sl-color-accent。
+   有边框元素（卡片/分页/按钮）边框+光晕变 accent；文字元素变 accent。
+   保留特例：左侧边栏选中项（官方 accent-high 背景）、hero 按钮（品牌渐变）、
+   表格行（淡背景）、分类链接（官方插件 accent-high 文字）。 */
+/* 正文链接 hover：官方变白 → 变强调蓝 */
+.sl-markdown-content a:hover:not(:where(.not-content *)) {
+	color: var(--sl-color-accent);
+	text-decoration-color: var(--sl-color-accent);
+}
+/* 卡片 hover 光晕增强：加 1px accent 光圈（方案 A 风格），与分页卡片统一 */
+.sl-markdown-content .card:hover {
+	border-color: var(--sl-color-accent);
+	box-shadow:
+		0 0 0 1px var(--sl-color-accent),
+		0 12px 28px var(--zh-shadow-md);
 }
 
 

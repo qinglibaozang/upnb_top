@@ -1,0 +1,376 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上一页/下一页 方案预览</title>
+<style>
+  :root {
+    --accent: hsl(224, 100%, 60%);
+    --accent-high: hsl(224, 100%, 85%);
+    --accent-low: hsl(224, 54%, 20%);
+    --gray-1: hsl(224, 20%, 94%);
+    --gray-2: hsl(224, 6%, 77%);
+    --gray-4: hsl(224, 10%, 38%);
+    --gray-5: hsl(224, 14%, 26%);
+    --bg: hsl(224, 15%, 13%);
+    --text: hsl(224, 20%, 94%);
+    --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  html[data-theme='light'] {
+    --accent: hsl(234, 90%, 60%);
+    --accent-high: hsl(234, 80%, 30%);
+    --accent-low: hsl(234, 88%, 90%);
+    --gray-1: hsl(224, 20%, 10%);
+    --gray-2: hsl(224, 10%, 33%);
+    --gray-4: hsl(224, 10%, 66%);
+    --gray-5: hsl(224, 14%, 84%);
+    --bg: #ffffff;
+    --text: hsl(224, 20%, 10%);
+    --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 860px;
+    margin: 0 auto 2rem;
+  }
+  h1 { font-size: 1.4rem; margin: 0; }
+  .theme-switch {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .section {
+    max-width: 860px;
+    margin: 0 auto 2.5rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .section-head h2 { font-size: 1.1rem; margin: 0; }
+  .section-head .tag {
+    font-size: 0.75rem;
+    color: var(--gray-2);
+    border: 1px solid var(--gray-5);
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+  }
+  .section-head .desc { font-size: 0.85rem; color: var(--gray-2); }
+
+  /* ============ 通用模拟：文章底部上下文 ============ */
+  .page-context {
+    border-top: 1px solid var(--gray-5);
+    padding-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--gray-2);
+  }
+  /* 图标统一 18px（配合小字号） */
+  .pagination-current svg,
+  .pagination-a svg,
+  .pagination-b svg,
+  .pagination-c svg { width: 18px; height: 18px; }
+
+  /* ============ 当前（官方默认） ============ */
+  .pagination-current {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: 0.75rem;
+  }
+  .pagination-current a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    flex-basis: calc(50% - 0.5rem);
+    flex-grow: 1;
+    border: 1px solid var(--gray-5);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    text-decoration: none;
+    color: var(--gray-2);
+    box-shadow: var(--shadow-md);
+    overflow-wrap: anywhere;
+  }
+  .pagination-current [rel='next'] {
+    justify-content: end;
+    text-align: end;
+    flex-direction: row-reverse;
+  }
+  .pagination-current a:hover { border-color: var(--gray-2); }
+  .pagination-current .link-title {
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .pagination-current svg { flex-shrink: 0; }
+  .pagination-current .label { font-size: 0.75rem; }
+
+  /* ============ 方案 A：强调色卡片（hover 变 accent） ============ */
+  .pagination-a {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: 0.75rem;
+  }
+  .pagination-a a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    width: 100%;
+    flex-basis: calc(50% - 0.5rem);
+    flex-grow: 1;
+    border: 1px solid var(--gray-5);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    text-decoration: none;
+    color: var(--gray-2);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .pagination-a [rel='next'] {
+    justify-content: end;
+    text-align: end;
+    flex-direction: row-reverse;
+  }
+  .pagination-a a:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), var(--shadow-md);
+  }
+  .pagination-a .link-title {
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .pagination-a a:hover .link-title { color: var(--accent); }
+  .pagination-a .label { font-size: 0.75rem; }
+  .pagination-a svg { flex-shrink: 0; transition: color 0.2s ease; }
+  .pagination-a a:hover svg { color: var(--accent); }
+
+  /* ============ 方案 B：极简分隔线（无卡片） ============ */
+  .pagination-b {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--gray-5);
+    border-bottom: 1px solid var(--gray-5);
+  }
+  .pagination-b a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--gray-2);
+    transition: color 0.2s ease;
+  }
+  .pagination-b [rel='next'] {
+    text-align: end;
+    align-items: flex-end;
+    border-inline-start: 1px solid var(--gray-5);
+  }
+  .pagination-b a:hover { color: var(--accent); }
+  .pagination-b .link-title {
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .pagination-b a:hover .link-title { color: var(--accent); }
+  .pagination-b .label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+  }
+  .pagination-b [rel='next'] .label { flex-direction: row-reverse; }
+
+  /* ============ 方案 C：浅色底胶囊（accent-low 背景） ============ */
+  .pagination-c {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: 0.75rem;
+  }
+  .pagination-c a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    width: 100%;
+    flex-basis: calc(50% - 0.5rem);
+    flex-grow: 1;
+    background: var(--accent-low);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    text-decoration: none;
+    color: var(--gray-2);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .pagination-c [rel='next'] {
+    justify-content: end;
+    text-align: end;
+    flex-direction: row-reverse;
+  }
+  .pagination-c a:hover {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .pagination-c .link-title {
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .pagination-c .label { font-size: 0.75rem; }
+  .pagination-c svg { flex-shrink: 0; color: var(--accent); }
+
+  /* 响应式：窄屏 B 方案改单列 */
+  @media (max-width: 640px) {
+    .pagination-b { grid-template-columns: 1fr; }
+    .pagination-b [rel='next'] {
+      border-inline-start: none;
+      border-top: 1px solid var(--gray-5);
+    }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>上一页 / 下一页 · 方案预览</h1>
+  <button class="theme-switch" id="themeBtn">切换为亮色</button>
+</div>
+
+<!-- 当前 -->
+<div class="section">
+  <div class="section-head">
+    <h2>当前（官方默认）</h2>
+    <span class="tag">现状</span>
+    <span class="desc">灰边框卡片 + 阴影 + 小箭头，无强调色</span>
+  </div>
+  <nav class="pagination-current" dir="ltr">
+    <a href="#" rel="prev">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span>
+        <span class="label">上一页</span>
+        <br>
+        <span class="link-title">Chat Prompt</span>
+      </span>
+    </a>
+    <a href="#" rel="next">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      <span>
+        <span class="label">下一页</span>
+        <br>
+        <span class="link-title">核心概念</span>
+      </span>
+    </a>
+  </nav>
+</div>
+
+<!-- 方案 A -->
+<div class="section">
+  <div class="section-head">
+    <h2>方案 A：强调色卡片</h2>
+    <span class="tag">推荐</span>
+    <span class="desc">保留卡片结构，hover 时边框 + 标题 + 箭头变强调蓝，圆角加大</span>
+  </div>
+  <nav class="pagination-a" dir="ltr">
+    <a href="#" rel="prev">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span>
+        <span class="label">上一页</span>
+        <br>
+        <span class="link-title">Chat Prompt</span>
+      </span>
+    </a>
+    <a href="#" rel="next">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      <span>
+        <span class="label">下一页</span>
+        <br>
+        <span class="link-title">核心概念</span>
+      </span>
+    </a>
+  </nav>
+</div>
+
+<!-- 方案 B -->
+<div class="section">
+  <div class="section-head">
+    <h2>方案 B：极简分隔线</h2>
+    <span class="tag">简洁</span>
+    <span class="desc">去掉卡片和阴影，上下 hairline 分隔，hover 文字变强调蓝</span>
+  </div>
+  <nav class="pagination-b" dir="ltr">
+    <a href="#" rel="prev">
+      <span class="label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        上一页
+      </span>
+      <span class="link-title">Chat Prompt</span>
+    </a>
+    <a href="#" rel="next">
+      <span class="label">
+        下一页
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </span>
+      <span class="link-title">核心概念</span>
+    </a>
+  </nav>
+</div>
+
+<!-- 方案 C -->
+<div class="section">
+  <div class="section-head">
+    <h2>方案 C：浅色底胶囊</h2>
+    <span class="tag">柔和</span>
+    <span class="desc">accent-low 浅蓝底无边框，箭头常显强调蓝，hover 底加深</span>
+  </div>
+  <nav class="pagination-c" dir="ltr">
+    <a href="#" rel="prev">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span>
+        <span class="label">上一页</span>
+        <br>
+        <span class="link-title">Chat Prompt</span>
+      </span>
+    </a>
+    <a href="#" rel="next">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      <span>
+        <span class="label">下一页</span>
+        <br>
+        <span class="link-title">核心概念</span>
+      </span>
+    </a>
+  </nav>
+</div>
+
+<div class="section">
+  <div class="page-context">以上为纯样式预览（未接入站点），交互 hover 效果可直接鼠标悬停查看。选定方案后我会落地到 src/styles/zh.css。</div>
+</div>
+
+<script>
+  const btn = document.getElementById('themeBtn');
+  btn.addEventListener('click', () => {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    btn.textContent = isDark ? '切换为暗色' : '切换为亮色';
+  });
+</script>
+</body>
+</html>

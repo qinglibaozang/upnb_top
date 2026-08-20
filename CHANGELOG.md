@@ -1,6 +1,18 @@
 # 更新日志
 
 ## 2026-08-20
+### 新增
+- 上一页/下一页分页导航样式改版（方案 A 强调色卡片）：卡片更紧凑（0.6rem 内边距、圆角 0.6rem），标题字号由官方 24px 收敛为 16px（= 全局正文）、小标签 12px、图标 18px；hover 时边框、标题、箭头统一变强调蓝并带 1px accent 光圈——站点全局 hover 语义统一为「方案 A」（详见下）
+
+### 变更
+- 强调色体系还原 Starlight 官方 accent：删除自研品牌蓝变量（`--zh-brand` / `--zh-brand-strong` / `--zh-brand-glow` / `--zh-article-active-text` / `--zh-article-active-bg`），恢复官方 accent 三件套（暗色 `hsl(224,100%,60%)` / 亮色 `hsl(234,90%,60%)`）；hero 按钮、文章标题渐变、选中态等引用全部改用官方 token（`--sl-color-accent` / `--sl-color-text-accent` / `--sl-color-accent-low`）
+- 全站 hover 统一为「方案 A（强调蓝）」：左侧边栏链接 hover 淡背景行 + 文字变 accent + 1px accent 光圈（相邻链接加 3px 垂直间距避免光圈叠边）；正文链接、页脚、移动端 dock、卡片 hover 文字/边框变 accent；保留特例——左侧边栏选中项（官方 accent-high 背景）、hero 按钮（品牌渐变）、分类链接（官方插件样式）
+- 左侧边栏行高由 2 收敛为 1.7（方案 C：紧凑阅读行距）、链接 padding 2px、圆角恢复官方 0.25rem；选中态还原官方样式（font-weight 600 + accent-high 背景）
+
+### 修复
+- 右侧边栏（TOC）回归 Starlight 官方交互：撤销 TOC 专用 hover 光圈与间距实验（层级缩进导致边框长短不一、与当前项 mark 线冲突），TOC hover 恢复为官方深灰文字、透明背景；仅保留 accent 变量替换（品牌变量删除后必须）
+
+## 2026-08-19
 ### 变更
 - 首页版权条改为正常文档流页脚（不再是吸在视口底部的 fixed 毛玻璃条）：改用粘性页脚（sticky footer）机制——`.page` 原生 `min-height: 100vh` + flex column，通过 `.main-frame → TwoColumnContent 外层 → .lg:sl-flex → .main-pane → main → 最后一个 .content-panel → .sl-container` 逐层 `flex: 1` 传递剩余高度，footer 用 `margin-top: auto` 吸收：短页面页脚贴视口底部、长页面页脚随内容滚动到末尾，与顶部导航栏的"钉死"逻辑彻底脱钩
 
